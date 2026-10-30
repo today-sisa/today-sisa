@@ -54,5 +54,5 @@ many += [{"source": s, "title": f"{s} 기사 {i}", "desc": "", "link": f"https:/
 mixed = g.apply_banned(cfg, many)
 dist = g.RUN["candidates_by_source"]
 print(dist)
-assert len(mixed) == cfg["max_candidates"] and all(dist[s] == 5 for s in ["YTN", "KBS", "SBS"])
+assert len(mixed) == min(cfg["max_candidates"], len(many)) and all(dist[s] == 5 for s in ["YTN", "KBS", "SBS"])
 print("추가 검사 통과")

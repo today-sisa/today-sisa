@@ -161,6 +161,13 @@ VIEWS.teacherMode = () => {
   mWeb.onclick = () => { LS.set('mode', 'web'); go(LS.get('myClass', null) ? 'teacherHome' : 'classSetup', {}, true); };
 };
 
+function daysAgo(it){
+  if(!it.pub) return '';
+  const n = Math.round((new Date(DAY.date) - new Date(it.pub)) / 864e5);
+  if(n <= 0) return '';
+  return `<span class="tag cat">${n === 1 ? '어제' : n === 2 ? '그제' : `${n}일 전`} 보도</span>`;
+}
+
 function sayHello(mode){
   if(!CFG.REGISTRY_URL || LS.get('helloSent', false)) return;
   let id = LS.get('deviceId', '');
@@ -194,7 +201,7 @@ VIEWS.teacherHome = () => {
       : '반을 만들면 여기서 <b>우리 반 주제로 정하기</b>를 할 수 있어요.'}</p>
     <ol class="rank-list">${DAY.items.map(it => `
       <li><span class="num">${it.rank}</span><div>
-        <span class="tag ${it.type}">${TYPE_NAME[it.type]}</span><span class="tag cat">${esc(it.category)}</span>
+        <span class="tag ${it.type}">${TYPE_NAME[it.type]}</span><span class="tag cat">${esc(it.category)}</span>${daysAgo(it)}
         ${topicRank === it.rank ? '<span class="picked-topic">오늘 우리 반 주제</span>' : ''}
         <h3 style="margin-top:6px">${esc(it.title)}</h3>
         <p>${(it.summary||[]).map(esc).join(' ')}</p>

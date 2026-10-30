@@ -15,8 +15,11 @@
   "election_mode": false,
   "_election_mode": "선거 기간에는 true로 바꾸세요. 정책 뉴스도 모두 제외됩니다.",
 
-  "hours_back": 30,
-  "max_candidates": 90,
+  "hours_back": 72,
+  "recent_days": 3,
+  "pool_size": 10,
+  "_hours_back": "최근 3일 뉴스에서 고르고, 최근 3일 동안 1~5순위에 올랐던 뉴스는 다시 고르지 않습니다. AI가 후보 10개를 고르면 영상이 있는 뉴스를 앞으로 해서 5개를 정합니다.",
+  "max_candidates": 120,
 
   "feeds": [
     { "source": "연합뉴스", "url": "https://www.yna.co.kr/rss/news.xml" },
@@ -24,12 +27,12 @@
     { "source": "SBS", "url": "https://news.sbs.co.kr/news/headlineRssFeed.do?plink=RSSREADER" },
     { "source": "JTBC", "url": "https://news-ex.jtbc.co.kr/v1/get/rss/issue" },
     { "source": "MBC", "url": "https://imnews.imbc.com/rss/news/news_00.xml" },
-    { "source": "YTN", "url": "https://news.google.com/rss/search?q=site:ytn.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
-    { "source": "KBS", "url": "https://news.google.com/rss/search?q=site:news.kbs.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
-    { "source": "MBC", "url": "https://news.google.com/rss/search?q=site:imnews.imbc.com+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
-    { "source": "SBS", "url": "https://news.google.com/rss/search?q=site:news.sbs.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
-    { "source": "JTBC", "url": "https://news.google.com/rss/search?q=site:news.jtbc.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
-    { "source": "연합뉴스TV", "url": "https://news.google.com/rss/search?q=site:yonhapnewstv.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" }
+    { "source": "YTN", "url": "https://news.google.com/rss/search?q=site:ytn.co.kr+when:3d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "KBS", "url": "https://news.google.com/rss/search?q=site:news.kbs.co.kr+when:3d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "MBC", "url": "https://news.google.com/rss/search?q=site:imnews.imbc.com+when:3d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "SBS", "url": "https://news.google.com/rss/search?q=site:news.sbs.co.kr+when:3d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "JTBC", "url": "https://news.google.com/rss/search?q=site:news.jtbc.co.kr+when:3d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "연합뉴스TV", "url": "https://news.google.com/rss/search?q=site:yonhapnewstv.co.kr+when:3d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" }
   ],
   "_feeds_순서": "직접 RSS가 막혀도 구글 뉴스 경유로 같은 언론사 기사를 받습니다. 후보는 언론사별로 골고루 섞어 AI에 보냅니다.",
   "_feeds": "주소가 막히면 그 피드만 건너뛰고 나머지로 진행합니다. 매일 기록(Actions 로그)에 피드별 기사 수가 찍힙니다.",

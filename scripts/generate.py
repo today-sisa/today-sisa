@@ -111,10 +111,9 @@ def fetch_candidates(cfg: dict) -> list[dict]:
             if not title or not link:
                 continue
             ts = e.get("published_parsed") or e.get("updated_parsed")
-            if ts and not MOCK:
-                pub = dt.datetime(*ts[:6], tzinfo=dt.timezone.utc)
-                if pub < cutoff:
-                    continue
+            pub = dt.datetime(*ts[:6], tzinfo=dt.timezone.utc) if ts else now
+            if ts and not MOCK and pub < cutoff:
+                continue
             key = (f["source"], norm_title(title))
             if key in seen:
                 continue
@@ -125,6 +124,7 @@ def fetch_candidates(cfg: dict) -> list[dict]:
             items.append({
                 "source": f["source"], "title": title, "desc": desc[:220],
                 "link": link, "via": f.get("via", "direct"),
+                "pub": pub.astimezone(KST).date().isoformat(),
             })
             count += 1
         log(f"피드 {f['source']}{'(구글)' if f.get('via') == 'google' else ''}: {count}건")
@@ -133,10 +133,36 @@ def fetch_candidates(cfg: dict) -> list[dict]:
     return items
 
 
+def recent_used(days: int = 3) -> tuple[set, list]:
+    """최근 며칠 동안 1~5순위에 올랐던 뉴스 제목(정규화)과 주제 목록"""
+    titles, topics = set(), []
+    today = today_kst()
+    for k in range(1, days + 1):
+        f = ARCHIVE / f"{(today - dt.timedelta(days=k)).isoformat()}.json"
+        if not f.exists():
+            continue
+        try:
+            d = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        for it in d.get("items", [d.get("main", {})] if d.get("main") else []):
+            for t in [it.get("original_title", "")] + list(it.get("member_titles", [])):
+                if t:
+                    titles.add(norm_title(t))
+            if it.get("topic"):
+                topics.append(it["topic"])
+    return titles, topics
+
+
 def apply_banned(cfg: dict, items: list[dict]) -> list[dict]:
     banned = cfg.get("banned_words", [])
     kept = [it for it in items if not any(b in it["title"] or b in it["desc"] for b in banned)]
     log(f"금지어 필터: {len(items)} → {len(kept)}건")
+    used, _ = recent_used(cfg.get("recent_days", 3))
+    if used:
+        before = len(kept)
+        kept = [it for it in kept if norm_title(it["title"]) not in used]
+        log(f"최근에 다룬 뉴스 빼기: {before} → {len(kept)}건")
     # 언론사별로 골고루 섞기 (한 언론사가 후보 칸을 다 차지하지 않도록)
     by_src: dict[str, list] = {}
     for it in kept:
@@ -230,13 +256,14 @@ def build_select_prompt(cfg: dict, cands: list[dict]) -> str:
     rule = ("- **지금은 선거 기간이다. 정책 뉴스도 모두 제외한다.**"
             if cfg.get("election_mode") else "")
     tpl = tpl.replace("{{ELECTION_RULE}}", rule)
-    lines = [f'{c["id"]}. [{c["source"]}] {c["title"]}' + (f' — {c["desc"]}' if c["desc"] else "")
+    lines = [f'{c["id"]}. [{c["source"]}·{c.get("pub", "")[5:]}] {c["title"]}' + (f' — {c["desc"]}' if c["desc"] else "")
              for c in cands]
-    recent = ", ".join(t for t in recent_topics() if t) or "없음"
-    return f"{tpl}\n\n[최근 1순위 주제]\n{recent}\n\n[후보 기사 목록]\n" + "\n".join(lines)
+    _, topics = recent_used(cfg.get("recent_days", 3))
+    recent = ", ".join(dict.fromkeys(t for t in topics + recent_topics() if t)) or "없음"
+    return f"{tpl}\n\n[최근 3일 동안 다룬 주제]\n{recent}\n\n[후보 기사 목록]\n" + "\n".join(lines)
 
 
-def validate_picks(cfg: dict, raw: dict, cands: list[dict]) -> list[dict]:
+def validate_picks(cfg: dict, raw: dict, cands: list[dict], limit: int = 5, cat_max: int = 2) -> list[dict]:
     by_id = {c["id"]: c for c in cands}
     picks, used, cat_count = [], set(), {}
     for p in sorted(raw.get("picks", []), key=lambda x: x.get("rank", 99)):
@@ -249,7 +276,7 @@ def validate_picks(cfg: dict, raw: dict, cands: list[dict]) -> list[dict]:
         if by_id[main]["source"] not in cfg["broadcasters"] and bc:
             main = bc[0]
         cat = p.get("category", "기타")
-        if cat_count.get(cat, 0) >= 2:
+        if cat_count.get(cat, 0) >= cat_max:
             continue
         typ = p.get("type", "useful")
         sources = {by_id[m]["source"] for m in members}
@@ -267,7 +294,7 @@ def validate_picks(cfg: dict, raw: dict, cands: list[dict]) -> list[dict]:
             "score": p.get("score"), "topic": str(p.get("topic", ""))[:20],
             "reason": str(p.get("reason", ""))[:120],
         })
-        if len(picks) == 5:
+        if len(picks) == limit:
             break
     for i, p in enumerate(picks):
         p["rank"] = i + 1
@@ -334,6 +361,18 @@ def resolve_channels(cfg: dict) -> dict:
     """handle → channelId. 실패한 채널은 제목으로만 확인."""
     if _channel_cache:
         return _channel_cache
+    cache_f = DATA / "channels.json"
+    try:  # 채널 번호는 잘 안 바뀌어서 저장해 두고 씀 (유튜브 사용량 절약)
+        saved = json.loads(cache_f.read_text(encoding="utf-8"))
+        if saved.get("handles") == [c["handle"] for c in cfg["youtube_channels"]]:
+            by_name = {c["name"]: c for c in cfg["youtube_channels"]}
+            for cid, name in saved["ids"].items():
+                if name in by_name:
+                    _channel_cache[cid] = by_name[name]
+            if _channel_cache:
+                return _channel_cache
+    except Exception:
+        pass
     for ch in cfg["youtube_channels"]:
         try:
             res = yt_get("channels", {"part": "id,snippet", "forHandle": ch["handle"]})
@@ -345,6 +384,10 @@ def resolve_channels(cfg: dict) -> dict:
                 log(f"채널 확인 실패: {ch['name']} ({ch['handle']}) — config.json의 handle을 확인하세요")
         except Exception as e:
             log(f"채널 확인 오류: {ch['name']} {e}")
+    if _channel_cache:
+        cache_f.write_text(json.dumps({"handles": [c["handle"] for c in cfg["youtube_channels"]],
+                                       "ids": {k: v["name"] for k, v in _channel_cache.items()}},
+                                      ensure_ascii=False, indent=1), encoding="utf-8")
     return _channel_cache
 
 
@@ -357,7 +400,7 @@ def find_videos(cfg: dict, pick: dict, by_id: dict) -> list[dict]:
         return []
     ids = resolve_channels(cfg)
     title_map = {t: ch for ch in cfg["youtube_channels"] for t in ch["titles"]}
-    after = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=40)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    after = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=cfg.get("hours_back", 72) + 12)).strftime("%Y-%m-%dT%H:%M:%SZ")
     queries = []
     for m in [pick["main"]] + pick["members"]:
         q = re.sub(r"\[[^\]]*\]|\([^)]*\)|[\"'“”‘’…]", " ", by_id[m]["title"])
@@ -365,7 +408,7 @@ def find_videos(cfg: dict, pick: dict, by_id: dict) -> list[dict]:
         if q and q not in queries:
             queries.append(q)
     found, seen = [], set()
-    for q in queries[:2]:  # 검색은 최대 2번 (하루 무료 한도 안에서 넉넉함)
+    for q in queries[:1]:  # 뉴스당 검색 1번 (유튜브 사용량 절약)
         try:
             res = yt_get("search", {"part": "snippet", "q": q, "type": "video", "maxResults": 25,
                                     "publishedAfter": after, "regionCode": "KR", "relevanceLanguage": "ko",
@@ -381,9 +424,28 @@ def find_videos(cfg: dict, pick: dict, by_id: dict) -> list[dict]:
             seen.add(vid)
             found.append({"id": vid, "title": html.unescape(sn["title"]), "channel": ch["name"],
                           "kind": ch["kind"]})
-    found.sort(key=lambda v: 0 if v["kind"] == "news" else 1)
-    log(f"공식 채널 영상 후보 {len(found)}개")
+    titles = [by_id[m]["title"] for m in pick["members"]]
+    for v in found:
+        v["match"] = max(title_sim(v["title"], t) for t in titles)
+    found.sort(key=lambda v: (-(v["match"] >= MATCH_MIN), 0 if v["kind"] == "news" else 1, -v["match"]))
+    log(f"공식 채널 영상 후보 {len(found)}개 (제목이 비슷한 것 {sum(v['match'] >= MATCH_MIN for v in found)}개)")
     return found[:8]
+
+
+MATCH_MIN = 0.18
+
+
+def _bigrams(t: str) -> set:
+    t = re.sub(r"[^가-힣a-zA-Z0-9]", "", re.sub(r"\[[^\]]*\]|\([^)]*\)|/.*$", "", t)).lower()
+    return {t[i:i + 2] for i in range(len(t) - 1)}
+
+
+def title_sim(a: str, b: str) -> float:
+    """기사 제목과 영상 제목이 같은 뉴스인지 대략 보는 값 (0~1)"""
+    x, y = _bigrams(a), _bigrams(b)
+    if not x or not y:
+        return 0.0
+    return len(x & y) / min(len(x), len(y))
 
 
 # ─────────────────────────── 5. 학습지 ───────────────────────────
@@ -391,7 +453,8 @@ def find_videos(cfg: dict, pick: dict, by_id: dict) -> list[dict]:
 def build_worksheet_prompt(pick: dict, by_id: dict, body: str, videos: list[dict], d: dt.date) -> str:
     tpl = (PROMPTS / "worksheet.md").read_text(encoding="utf-8")
     main = by_id[pick["main"]]
-    parts = [tpl, f"\n\n오늘 날짜: {d.year}년 {d.month}월 {d.day}일 (기사는 어제~오늘 보도)",
+    pubs = sorted({by_id[m].get("pub", "") for m in pick["members"]} - {""})
+    parts = [tpl, f"\n\n오늘 날짜: {d.year}년 {d.month}월 {d.day}일 (이 기사 보도일: {', '.join(pubs) or '최근'})",
              f"\n[기사 자료] ({pick['rank']}순위)",
              f"유형(type): {pick['type']}", f"분야: {pick['category']}", f"주제: {pick['topic']}",
              f"대표 제목: {main['title']}"]
@@ -532,6 +595,8 @@ def build_item(pick, by_id, ws, videos) -> dict:
         **main,
         "rank": pick["rank"], "type": pick["type"], "category": pick["category"], "topic": pick["topic"],
         "reason": pick["reason"], "source": c["source"], "link": c["link"], "original_title": c["title"],
+        "member_titles": [by_id[m]["title"] for m in pick["members"]][:6],
+        "pub": max((by_id[m].get("pub", "") for m in pick["members"]), default=""),
         "related": [{"source": by_id[m]["source"], "link": by_id[m]["link"]}
                     for m in pick["members"] if m != pick["main"]][:4],
         "video": video,
@@ -648,9 +713,27 @@ def run():
         raise SystemExit("후보 기사가 너무 적습니다. 피드 주소를 확인하세요. (어제 학습지가 그대로 보입니다)")
     by_id = {c["id"]: c for c in cands}
 
-    picks = validate_picks(cfg, gemini(cfg, build_select_prompt(cfg, cands), "select.json"), cands)
-    if not picks:
+    pool = validate_picks(cfg, gemini(cfg, build_select_prompt(cfg, cands), "select.json"), cands,
+                          limit=cfg.get("pool_size", 10), cat_max=3)
+    if not pool:
         raise SystemExit("선정 결과가 비었습니다. (어제 학습지가 그대로 보입니다)")
+    # 후보 10개 모두 영상을 먼저 찾아보고, 영상이 있는 뉴스를 앞으로
+    vids = {}
+    for p in pool:
+        vids[id(p)] = find_videos(cfg, p, by_id)
+    has = lambda p: any(v.get("match", 0) >= MATCH_MIN for v in vids[id(p)])
+    ordered = [p for p in pool if has(p)] + [p for p in pool if not has(p)]
+    picks, cat_count = [], {}
+    for p in ordered:
+        if cat_count.get(p["category"], 0) >= 2:
+            continue
+        cat_count[p["category"]] = cat_count.get(p["category"], 0) + 1
+        picks.append(p)
+        if len(picks) == 5:
+            break
+    for i, p in enumerate(picks):
+        p["rank"] = i + 1
+    log(f"후보 {len(pool)}개 중 영상 있는 뉴스 {sum(has(p) for p in pool)}개 → 최종 {len(picks)}개")
     for p in picks:
         log(f"{p['rank']}순위 [{p['type']}/{p['category']}] {by_id[p['main']]['title']}")
     RUN["picks"] = [{"rank": p["rank"], "type": p["type"], "source": by_id[p["main"]]["source"],
@@ -659,7 +742,7 @@ def run():
     items, RUN["items"] = [], []
     for p in picks:
         body = gather_body(p, by_id)
-        videos = find_videos(cfg, p, by_id)
+        videos = vids[id(p)]
         try:
             ws = make_worksheet(cfg, p, by_id, body, videos, d)
         except Exception as e:  # 한 순위가 실패해도 나머지는 살림
