@@ -1,0 +1,73 @@
+name: 오늘의 시사 만들기
+
+on:
+  schedule:
+    # 한국 시간 평일 아침 6시 30분 (GitHub는 영국 시간 기준이라 전날 21:30)
+    # 몰리는 시간엔 10~30분 늦게 시작될 수 있어 7시보다 일찍 걸어 둡니다.
+    - cron: "30 21 * * 0-4"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "할 일"
+        type: choice
+        options:
+          - 오늘 것 다시 만들기
+          - 그날 뉴스 숨기기
+          - 숨긴 뉴스 다시 보이기
+        default: 오늘 것 다시 만들기
+      date:
+        description: "날짜 (숨기기·다시 보이기 때만, 예: 2026-10-30)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: today-news
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 준비
+        run: pip install feedparser requests beautifulsoup4
+
+      - name: 뉴스 선정 + 학습지 만들기
+        if: github.event_name == 'schedule' || inputs.mode == '오늘 것 다시 만들기'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python scripts/generate.py --force
+          else
+            python scripts/generate.py
+          fi
+
+      - name: 숨기기
+        if: inputs.mode == '그날 뉴스 숨기기'
+        run: python scripts/generate.py --hide "${{ inputs.date }}"
+
+      - name: 다시 보이기
+        if: inputs.mode == '숨긴 뉴스 다시 보이기'
+        run: python scripts/generate.py --unhide "${{ inputs.date }}"
+
+      - name: 저장소에 올리기
+        run: |
+          git config user.name "today-news-bot"
+          git config user.email "today-news-bot@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "바뀐 내용 없음"
+          else
+            git commit -m "오늘의 시사 $(TZ=Asia/Seoul date +%Y-%m-%d)"
+            git push
+          fi

@@ -1,0 +1,7 @@
+{"picks":[
+ {"rank":1,"members":[0,3,6],"main":3,"category":"생활·문화","type":"debate","score":91,"topic":"수업 중 휴대전화 제한","reason":"아이 생활과 직접 맞닿아 있고 학교 규칙과 자율이라는 가치가 갈려 토론하기 좋음"},
+ {"rank":2,"members":[1],"main":1,"category":"과학·환경","type":"useful","score":82,"topic":"플라스틱 분해 미생물","reason":"환경 단원과 연계되는 밝은 과학 뉴스"},
+ {"rank":3,"members":[4],"main":4,"category":"스포츠","type":"useful","score":78,"topic":"장애인 수영 첫 메달","reason":"도전과 노력, 장애인 스포츠에 대한 이해"},
+ {"rank":4,"members":[5],"main":5,"category":"과학·환경","type":"useful","score":76,"topic":"사과 재배지 이동","reason":"기후 변화가 우리 먹거리에 주는 영향"},
+ {"rank":5,"members":[7],"main":7,"category":"정책","type":"debate","score":70,"topic":"일회용 컵 보증금제","reason":"환경 보호와 생활의 편리함 사이의 선택"}
+]}

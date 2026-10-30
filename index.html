@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘의 시사</title>
+<meta name="description" content="초등 5·6학년 아침 시사 학습지 — 매일 아침 뉴스 1~5순위와 학습지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+<style>
+:root{
+  --ink:#1F2A44; --ink-soft:#4B5672; --line:#D5DEEA; --paper:#FBFCFE; --sky:#E3EEFA; --sky-deep:#BFD6F0;
+  --sun:#F6C445; --sun-soft:#FFF3CC; --fact:#1E7F7A; --fact-soft:#DDF1EF; --opin:#7E4A93; --opin-soft:#F0E4F5;
+  --a:#2C68AE; --a-soft:#E1ECF8; --b:#5E7F24; --b-soft:#EAF1DC; --warn:#A2461F; --warn-soft:#FBEADF;
+  --r-lg:22px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Gowun Dodum",system-ui,sans-serif;
+  font-size:18px;line-height:1.65;font-weight:700}
+button,input,textarea{font:inherit;color:inherit}
+a{color:var(--a)}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 64px}
+
+/* 머리 — 아침 하늘 띠와 날짜 도장 */
+.top{background:linear-gradient(180deg,var(--sky) 0%,var(--paper) 100%);padding:22px 0 8px}
+.top .wrap{padding-bottom:0;display:flex;align-items:center;gap:14px}
+.stamp{flex:none;width:74px;height:74px;border-radius:50%;background:var(--sun);display:grid;place-items:center;
+  text-align:center;line-height:1.05;box-shadow:inset 0 0 0 3px #fff, 0 0 0 2px var(--sun)}
+.stamp b{display:block;font-size:28px}.stamp small{font-size:13px;white-space:nowrap}
+.brand{font-size:15px;color:var(--ink-soft);margin:0}
+.brand-title{font-size:26px;margin:0;line-height:1.2}
+.home-link{white-space:nowrap;margin-left:auto;background:none;border:0;color:var(--ink-soft);cursor:pointer;font-size:15px;padding:8px}
+
+.banner{border-radius:var(--r-sm);padding:10px 14px;margin:14px 0;font-size:15px}
+.banner.info{background:var(--sun-soft)}.banner.warn{background:var(--warn-soft);color:var(--warn)}
+
+h2{font-size:24px;line-height:1.35;margin:22px 0 8px}
+h3{font-size:19px;margin:18px 0 6px}
+p{margin:6px 0}
+.muted{color:var(--ink-soft);font-size:15px}
+
+.choice{display:grid;gap:12px;margin:18px 0}
+.big{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:var(--r-lg);
+  padding:18px 20px;cursor:pointer;transition:border-color .15s, transform .15s}
+.big:hover{border-color:var(--a)}.big:active{transform:scale(.99)}
+.big strong{display:block;font-size:21px}.big span{color:var(--ink-soft);font-size:15px}
+
+.btn{display:inline-block;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:12px 22px;cursor:pointer;
+  text-decoration:none;font-size:17px}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.sun{background:var(--sun);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+
+input[type=text],input[type=url],input[type=number],textarea{width:100%;border:2px solid var(--line);border-radius:var(--r-sm);
+  padding:12px 14px;background:#fff;font-size:17px}
+textarea{min-height:110px;resize:vertical;line-height:1.6}
+label.field{display:block;margin:12px 0 4px;font-size:16px}
+
+/* 오늘의 뉴스 카드 */
+.today{background:#fff;border:2px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;margin:16px 0}
+.tag{display:inline-block;font-size:14px;padding:2px 10px;border-radius:999px;margin-right:6px}
+.tag.useful{background:var(--sky)}.tag.debate{background:var(--sun-soft)}.tag.media{background:var(--opin-soft)}
+.tag.cat{background:#F1F3F7}
+.rank-list{list-style:none;padding:0;margin:8px 0}
+.rank-list li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.rank-list .num{width:30px;height:30px;border-radius:50%;background:var(--sky);display:grid;place-items:center;font-size:15px}
+.rank-list li:first-child .num{background:var(--sun)}
+
+/* 학생 단계 */
+.progress{display:flex;gap:6px;margin:18px 0 6px}
+.progress i{flex:1;height:8px;border-radius:4px;background:var(--sky)}
+.progress i.on{background:var(--sun)}.progress i.done{background:var(--sky-deep)}
+.step-name{font-size:15px;color:var(--ink-soft)}
+.panel{background:#fff;border:2px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;margin:12px 0}
+
+.video{position:relative;aspect-ratio:16/9;border-radius:var(--r-sm);overflow:hidden;background:#000}
+.video iframe,.video #yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video .cover{position:absolute;inset:0;background:var(--ink);color:#fff;display:grid;place-items:center;text-align:center;padding:16px}
+.video .cover[hidden]{display:none}
+
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{border:2px solid var(--line);background:#fff;border-radius:var(--r-sm);padding:10px 14px;text-align:left;cursor:pointer}
+.opt.right{border-color:var(--fact);background:var(--fact-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.opt.picked{border-color:var(--a);background:var(--a-soft)}
+
+.w5{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.w5 button{border:2px dashed var(--sky-deep);background:var(--paper);border-radius:var(--r-sm);padding:10px;text-align:left;cursor:pointer;min-height:72px}
+.w5 button b{display:block;font-size:15px;color:var(--ink-soft)}
+.w5 button.open{border-style:solid;background:var(--sky)}
+
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.side{border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;border:3px solid transparent;text-align:left}
+.side.a{background:var(--a-soft)}.side.b{background:var(--b-soft)}
+.side.a.picked{border-color:var(--a)}.side.b.picked{border-color:var(--b)}
+.side ul{margin:6px 0 0;padding-left:18px;font-size:16px}
+
+.fo{border:2px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;margin:8px 0;background:#fff}
+.fo .row{margin:8px 0 0}
+.fo button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 18px;cursor:pointer}
+.fo button.f.sel{background:var(--fact-soft);border-color:var(--fact)}
+.fo button.o.sel{background:var(--opin-soft);border-color:var(--opin)}
+.fo .why{font-size:15px;margin-top:6px}
+
+.heads{display:grid;gap:8px}
+.head{border-left:5px solid var(--opin);background:var(--opin-soft);padding:10px 14px;border-radius:0 var(--r-sm) var(--r-sm) 0}
+.head small{display:block;color:var(--ink-soft);font-size:14px}
+
+.nav{display:flex;justify-content:space-between;gap:10px;margin:18px 0}
+.done-card{text-align:center;padding:30px 20px}
+.done-card .medal{font-size:56px}
+
+/* 교사 */
+.tabs{display:flex;gap:6px;margin:14px 0;flex-wrap:wrap}
+.tabs button{border:0;background:#EEF2F7;border-radius:999px;padding:8px 16px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff}
+.code-box{font-size:44px;letter-spacing:.18em;text-align:center;background:var(--sun-soft);border-radius:var(--r-sm);padding:8px}
+#qr{display:grid;place-items:center;padding:12px;background:#fff}
+pre.gs{max-height:180px;overflow:auto;background:#F4F6FA;border-radius:var(--r-sm);padding:12px;font-size:12px;font-weight:400;font-family:ui-monospace,Menlo,monospace;white-space:pre-wrap}
+ol.steps{padding-left:22px}ol.steps li{margin:6px 0}
+.answer{background:var(--sky);border-radius:var(--r-sm);padding:8px 12px;margin:6px 0 12px;font-size:16px}
+.archive li{padding:8px 0;border-top:1px solid var(--line);list-style:none}
+.archive{padding:0}
+.foot{margin-top:40px;font-size:13px;color:var(--ink-soft);font-weight:400}
+
+@media (max-width:520px){
+  body{font-size:17px}.brand-title{font-size:22px}.stamp{width:62px;height:62px}.stamp b{font-size:23px}
+  .sides,.w5{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* 인쇄용 A4 */
+#print{display:none}
+@media print{
+  @page{size:A4;margin:12mm 13mm}
+  body{background:#fff;font-size:12pt;line-height:1.45}
+  #app,.top{display:none!important}
+  #print{display:block}
+  #print h1{font-size:20pt;margin:0 0 2mm}
+  #print .meta{font-size:10pt;color:#555;margin-bottom:3mm;display:flex;justify-content:space-between}
+  #print .box{border:1.2pt solid #333;border-radius:3mm;padding:2.6mm 4mm;margin:0 0 3mm;break-inside:avoid}
+  #print .box b.t{display:block;font-size:11pt;margin-bottom:1mm}
+  #print .lines{border-bottom:.6pt solid #999;height:9.5mm}
+  #print .q{margin-top:2.5mm}
+  #print .w3 td{height:12mm}
+  #print .side-p{background:#f3f3f3;border-radius:2mm;padding:2mm 3mm}
+  #print p{margin:1mm 0}
+  #print table{width:100%;border-collapse:collapse;font-size:12pt}
+  #print td,#print th{border:.6pt solid #888;padding:2mm 2.5mm;vertical-align:top}
+  #print .two{display:grid;grid-template-columns:1fr 1fr;gap:3mm}
+  #print .pb{break-before:page}
+  #print .small{font-size:10pt}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="stamp" id="stamp" aria-hidden="true"><div><b>--</b><small>&nbsp;</small></div></div>
+    <div>
+      <p class="brand" id="brandSub">초등 5·6학년 아침 시사</p>
+      <h1 class="brand-title" id="brandTitle">오늘의 시사</h1>
+    </div>
+    <button class="home-link" id="homeBtn" type="button">처음으로</button>
+  </div>
+</header>
+<main id="app" class="wrap" aria-live="polite"><p class="muted" style="margin-top:30px">오늘의 뉴스를 불러오는 중이에요.</p></main>
+<section id="print" aria-hidden="true"></section>
+
+<script>
+(() => {
+const CFG = window.TODAY_NEWS_CONFIG || {};
+const $app = document.getElementById('app');
+const qs = new URLSearchParams(location.search);
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem('tn:'+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('tn:'+k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem('tn:'+k); }catch(e){} }
+};
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TYPE_NAME = {useful:'알아두면 유익', debate:'생각이 갈림', media:'미디어 읽기'};
+const todayKST = () => new Date(Date.now() + 9*3600e3).toISOString().slice(0,10);
+let DAY = null, INDEX = [];
+let CLASS = null;      // 학생: {url, name, code}
+let STUDENT = null;    // {number, name}
+let state = {};        // 학생 답
+
+/* ───── 데이터 ───── */
+async function getJSON(path){
+  const r = await fetch(path + (path.includes('?') ? '&' : '?') + 't=' + Date.now(), {cache:'no-store'});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function loadDay(date){
+  try{ INDEX = await getJSON('data/index.json'); }catch(e){ INDEX = []; }
+  if(date) return getJSON(`data/archive/${date}.json`);
+  return getJSON('data/today.json');
+}
+
+function setStamp(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const wd = '일월화수목금토'[new Date(y, m-1, d).getDay()];
+  document.getElementById('stamp').innerHTML = `<div><b>${d}</b><small>${wd}요일</small></div>`;
+  document.getElementById('brandSub').textContent = `${m}월 ${d}일 아침 시사`;
+}
+
+function banners(forTeacher){
+  let h = '';
+  if(DAY.sample) h += `<div class="banner info">지금은 <b>예시 화면</b>이에요. 첫 자동 실행이 끝나면 실제 뉴스로 바뀝니다.</div>`;
+  if(!qs.get('date') && DAY.date !== todayKST()) h += `<div class="banner info">오늘 학습지가 아직 없어 가장 최근(${esc(DAY.date)}) 학습지를 보여 줘요.</div>`;
+  if(forTeacher && DAY.needs_review) h += `<div class="banner warn">자동 검사에서 확인이 필요한 부분이 있었어요: ${esc((DAY.review_notes||[]).join(', '))}. 수업 전에 한 번 읽어 봐 주세요.</div>`;
+  return h;
+}
+
+/* ───── 화면 전환 ───── */
+function show(html){ $app.innerHTML = html; window.scrollTo({top:0}); }
+document.getElementById('homeBtn').onclick = () => { if(CLASS && STUDENT) studentHome(); else home(); };
+
+/* ───── 첫 화면 ───── */
+function home(){
+  const m = DAY.main;
+  show(`${banners(false)}
+    <div class="today">
+      <span class="tag ${m.type}">${TYPE_NAME[m.type]}</span><span class="tag cat">${esc(m.category)}</span>
+      <h2 style="margin-top:10px">${esc(m.title)}</h2>
+      <p class="muted">오늘 아침 1순위 뉴스예요.</p>
+    </div>
+    <div class="choice">
+      <button class="big" id="goTeacher" type="button"><strong>선생님이에요</strong><span>오늘의 뉴스 1~5순위, 학습지 인쇄, 반 만들기</span></button>
+      <button class="big" id="goCode" type="button"><strong>반코드가 있어요</strong><span>선생님께 받은 반코드를 넣고 학습지를 풀어요</span></button>
+    </div>
+    <p class="muted"><a href="#" id="goArchive">지난 학습지 보기</a></p>
+    ${footer()}`);
+  goTeacher.onclick = teacherHome;
+  goCode.onclick = codeEntry;
+  goArchive.onclick = e => { e.preventDefault(); archive(); };
+}
+
+function footer(){
+  return `<p class="foot">뉴스 선정과 학습지는 AI가 자동으로 만들었어요. 수업 전 선생님 검토를 권장합니다. 기사 원문은 각 언론사에 있으며, 이 사이트는 새로 쓴 요약과 링크만 제공합니다.</p>`;
+}
+
+/* ───── 교사 ───── */
+function teacherHome(){
+  const mine = LS.get('myClass', null);
+  show(`${banners(true)}
+    <h2>어떻게 쓰실 건가요?</h2>
+    <div class="choice">
+      <button class="big" id="tPrint" type="button"><strong>인쇄해서 쓸래요</strong><span>설정 없이 바로. 뉴스 링크, 학습지 인쇄, 교사용 자료, TV 화면 띄우기</span></button>
+      <button class="big" id="tClass" type="button"><strong>학생과 함께 할래요</strong><span>내 구글 시트를 연결하면 반코드와 QR이 생기고, 학생 답이 시트로 모여요</span></button>
+    </div>
+    ${mine ? `<div class="panel"><b>내 반: ${esc(mine.name)}</b>${mine.code ? ` · 반코드 <b>${esc(mine.code)}</b>` : ''}
+      <div class="row"><button class="btn ghost" id="tMine" type="button">반코드·QR 다시 보기</button></div></div>` : ''}`);
+  tPrint.onclick = () => teacherView('news');
+  tClass.onclick = () => mine ? classReady(mine) : classSetup();
+  if(mine) tMine.onclick = () => classReady(mine);
+}
+
+function teacherView(tab){
+  const m = DAY.main;
+  show(`${banners(true)}
+    <div class="tabs" role="tablist">
+      ${[['news','오늘의 뉴스'],['sheet','학습지'],['guide','교사용'],['class','학생과 함께']].map(([k,v]) =>
+        `<button role="tab" aria-selected="${k===tab}" data-tab="${k}" type="button">${v}</button>`).join('')}
+    </div>
+    <div id="tabBody"></div>`);
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+    if(b.dataset.tab === 'class'){ const mine = LS.get('myClass', null); return mine ? classReady(mine) : classSetup(); }
+    teacherView(b.dataset.tab);
+  });
+  const body = document.getElementById('tabBody');
+  if(tab === 'news') body.innerHTML = newsTab();
+  if(tab === 'sheet') body.innerHTML = sheetTab();
+  if(tab === 'guide') body.innerHTML = guideTab();
+  bindTeacherTab();
+}
+
+function videoLink(v){ return v ? `https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}` : ''; }
+
+function newsTab(){
+  const m = DAY.main;
+  const items = [
+    {rank:1, title:m.title, type:m.type, category:m.category, source:m.source, link:m.link, reason:m.reason, video:m.video,
+     summary:m.summary, question:null},
+    ...DAY.others.map(o => ({...o, summary:o.brief_summary}))
+  ];
+  return `<ol class="rank-list">${items.map(it => `
+    <li><span class="num">${it.rank}</span><div>
+      <span class="tag ${it.type}">${TYPE_NAME[it.type]}</span><span class="tag cat">${esc(it.category)}</span>
+      <h3 style="margin-top:6px">${esc(it.title)}</h3>
+      <p>${(it.summary||[]).map(esc).join(' ')}</p>
+      ${it.question ? `<p class="muted">생각해 볼 질문: ${esc(it.question)}</p>` : ''}
+      <p class="muted">선정 이유: ${esc(it.reason)}</p>
+      <div class="row">
+        ${it.video ? `<a class="btn sun" href="${videoLink(it.video)}" target="_blank" rel="noopener">영상 (${esc(it.video.channel)})</a>` : ''}
+        <a class="btn ghost" href="${esc(it.link)}" target="_blank" rel="noopener">기사 원문 (${esc(it.source)})</a>
+      </div>
+      ${it.rank===1 ? `<div class="row"><button class="btn" data-act="tv" type="button">TV 화면 띄우기</button>
+        <button class="btn ghost" data-act="print" type="button">학습지 인쇄</button></div>` : ''}
+    </div></li>`).join('')}</ol>
+    <details class="panel"><summary>이 뉴스가 수업에 맞지 않나요?</summary>
+      <p class="muted">이유를 보내 주시면 선정 지침을 고치는 데 씁니다.</p>
+      <div class="row">${['너무 어려움','부적절함','지루함','기타'].map(r => `<button class="btn ghost" data-reason="${r}" type="button">${r}</button>`).join('')}</div>
+      <input type="text" id="fbMemo" placeholder="한 줄 메모 (선택)">
+      <p class="muted" id="fbMsg"></p>
+    </details>
+    ${footer()}`;
+}
+
+function sheetTab(){
+  return `<div class="panel"><p>A4 한 장 학습지예요. 인쇄 창에서 'PDF로 저장'을 고르면 웨일 클래스 과제로 올릴 수도 있어요.</p>
+    <div class="row"><button class="btn" data-act="print" type="button">학습지 인쇄</button>
+    <button class="btn ghost" data-act="printAns" type="button">정답·예시 답안 포함 인쇄</button></div></div>
+    ${previewSheet()}`;
+}
+
+function previewSheet(){
+  const m = DAY.main;
+  return `<div class="panel"><h3>${esc(m.title)}</h3>
+    <p>${(m.summary||[]).map(esc).join(' ')}</p>
+    <p class="muted">핵심 활동: ${TYPE_NAME[m.type]} · 쓰기 칸 2개 · 도전 문항 1개(온라인, 선택)</p></div>`;
+}
+
+function guideTab(){
+  const m = DAY.main, t = m.teacher || {};
+  const sa = t.sample_answers || {};
+  return `<div class="panel">
+    <h3>교과 연계</h3><p>${(m.curriculum||[]).map(esc).join('<br>')}</p>
+    <h3>예시 답안</h3>${Object.entries(sa).map(([k,v]) => `<p class="muted">${esc(questionLabel(k))}</p><div class="answer">${esc(v)}</div>`).join('')}
+    <h3>사실·의견 정답</h3>${(m.facts_opinions||[]).map(f => `<p>${esc(f.sentence)} → <b>${esc(f.answer)}</b> <span class="muted">${esc(f.reason)}</span></p>`).join('')}
+    <h3>더 물어볼 질문</h3><ul>${(t.extra_questions||[]).map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+    <h3>지도할 때 주의할 점</h3><ul>${(t.cautions||[]).map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+  </div>`;
+}
+function questionLabel(k){
+  const a = DAY.main.activity || {};
+  const map = {choose_question:a.choose_question, other_side_question:a.other_side_question, my_thought:DAY.main.my_thought,
+    impact_question:a.impact_question, wonder_question:a.wonder_question, word_question:a.word_question,
+    why_question:a.why_question, rewrite_question:a.rewrite_question, challenge:DAY.main.challenge};
+  return map[k] || k;
+}
+
+function bindTeacherTab(){
+  document.querySelectorAll('[data-act=print]').forEach(b => b.onclick = () => printSheet(false));
+  document.querySelectorAll('[data-act=printAns]').forEach(b => b.onclick = () => printSheet(true));
+  document.querySelectorAll('[data-act=tv]').forEach(b => b.onclick = () => { CLASS = null; STUDENT = {number:'', name:'우리 반'}; state = {}; tvMode = true; step(0); });
+  document.querySelectorAll('[data-reason]').forEach(b => b.onclick = () => sendFeedback(b.dataset.reason));
+}
+
+async function sendFeedback(reason){
+  const msg = document.getElementById('fbMsg');
+  if(!CFG.REGISTRY_URL){ msg.textContent = '의견 보내기는 운영자가 등록소를 연결한 뒤에 쓸 수 있어요.'; return; }
+  const memo = document.getElementById('fbMemo').value;
+  try{
+    await fetch(`${CFG.REGISTRY_URL}?action=feedback&date=${encodeURIComponent(DAY.date)}&reason=${encodeURIComponent(reason)}&memo=${encodeURIComponent(memo)}`);
+    msg.textContent = '보냈어요. 고맙습니다.';
+  }catch(e){ msg.textContent = '보내지 못했어요. 인터넷 연결을 확인해 주세요.'; }
+}
+
+/* ───── 반 만들기 ───── */
+let gsCode = '';
+async function classSetup(){
+  show(`<h2>학생과 함께 하기</h2>
+    <p>학생 답은 <b>선생님의 구글 시트에만</b> 저장돼요. 처음 한 번만 하면 됩니다. (5분)</p>
+    <div class="panel"><ol class="steps">
+      <li>구글 시트를 새로 만들어요. 이름 예: 오늘의 시사 답안 - 5·6학년</li>
+      <li>메뉴 <b>확장 프로그램 → Apps Script</b>를 열어요.</li>
+      <li>있던 내용을 모두 지우고 아래 코드를 붙여 넣고 저장해요.
+        <div class="row"><button class="btn ghost" id="copyGs" type="button">코드 복사</button><span class="muted" id="copyMsg"></span></div>
+        <pre class="gs" id="gs">코드를 불러오는 중…</pre></li>
+      <li><b>배포 → 새 배포 → 웹 앱</b>을 골라요. 실행: <b>나</b>, 액세스: <b>모든 사용자</b>로 하고 배포해요.
+        "확인되지 않은 앱"이 나오면 <b>고급 → 이동</b>을 눌러 허용해요. 내가 붙여 넣은 코드라 괜찮아요.</li>
+      <li>나온 <b>웹 앱 URL</b>을 아래에 붙여 넣어요.</li>
+    </ol></div>
+    <label class="field" for="sheetUrl">웹 앱 URL</label>
+    <input type="url" id="sheetUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <label class="field" for="className">반 이름</label>
+    <input type="text" id="className" placeholder="예: ○○초 5·6학년" maxlength="30">
+    <div class="row"><button class="btn" id="makeClass" type="button">연결 확인하고 반 만들기</button></div>
+    <p id="setupMsg" class="muted"></p>`);
+  try{ gsCode = gsCode || await (await fetch('apps-script/teacher-sheet.gs')).text(); }catch(e){ gsCode = '코드를 불러오지 못했어요. 저장소의 apps-script/teacher-sheet.gs 파일을 열어 복사해 주세요.'; }
+  gs.textContent = gsCode;
+  copyGs.onclick = async () => { try{ await navigator.clipboard.writeText(gsCode); copyMsg.textContent = '복사했어요.'; }catch(e){ copyMsg.textContent = '직접 선택해서 복사해 주세요.'; } };
+  makeClass.onclick = async () => {
+    const url = sheetUrl.value.trim(), name = className.value.trim() || '우리 반';
+    if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url)){ setupMsg.textContent = '주소는 https://script.google.com/macros/s/ 로 시작하고 /exec 로 끝나야 해요.'; return; }
+    setupMsg.textContent = '시트에 연결하는 중…';
+    try{
+      const r = await (await fetch(url + '?action=ping')).json();
+      if(!r.ok) throw new Error();
+    }catch(e){ setupMsg.textContent = '시트에 연결되지 않았어요. 배포할 때 액세스를 "모든 사용자"로 했는지 확인해 주세요.'; return; }
+    let code = '';
+    if(CFG.REGISTRY_URL){
+      try{
+        const r = await (await fetch(`${CFG.REGISTRY_URL}?action=register&url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`)).json();
+        if(r.ok) code = r.code;
+      }catch(e){}
+    }
+    const mine = {url, name, code};
+    LS.set('myClass', mine);
+    classReady(mine);
+  };
+}
+
+function classLink(mine){
+  const base = location.origin + location.pathname;
+  return mine.code ? `${base}?c=${mine.code}` : `${base}?u=${encodeURIComponent(mine.url)}&n=${encodeURIComponent(mine.name)}`;
+}
+
+function classReady(mine){
+  const link = classLink(mine);
+  show(`<h2>${esc(mine.name)}</h2>
+    <p>학생은 QR을 찍거나 링크로 들어와요. ${mine.code ? '반코드를 직접 넣어도 돼요.' : ''} 웨일 클래스에 링크를 걸어 두면 매일 같은 링크로 오늘의 학습지가 열려요.</p>
+    ${mine.code ? `<div class="code-box" aria-label="반코드">${esc(mine.code)}</div>` : ''}
+    <div id="qr" aria-label="반 QR 코드"></div>
+    <label class="field" for="clsLink">반 링크</label>
+    <input type="text" id="clsLink" readonly value="${esc(link)}">
+    <div class="row">
+      <button class="btn" id="copyLink" type="button">링크 복사</button>
+      <a class="btn ghost" href="${esc(link)}" target="_blank" rel="noopener">학생 화면 미리 보기</a>
+      <button class="btn ghost" id="toNews" type="button">오늘의 뉴스로</button>
+    </div>
+    <details class="panel"><summary>다른 시트로 바꾸기</summary>
+      <p class="muted">이 기기에 저장된 반 정보를 지우고 새로 만들어요. 기존 시트의 답안은 그대로 남아 있어요.</p>
+      <button class="btn ghost" id="resetCls" type="button">새로 만들기</button></details>`);
+  const draw = () => { if(window.QRCode){ new QRCode(document.getElementById('qr'), {text:link, width:220, height:220, correctLevel:QRCode.CorrectLevel.M}); } else setTimeout(draw, 300); };
+  draw();
+  copyLink.onclick = async () => { try{ await navigator.clipboard.writeText(link); copyLink.textContent = '복사했어요'; }catch(e){ clsLink.select(); } };
+  toNews.onclick = () => teacherView('news');
+  resetCls.onclick = () => { LS.del('myClass'); classSetup(); };
+}
+
+/* ───── 학생 입장 ───── */
+function codeEntry(){
+  show(`<h2>반코드를 넣어 주세요</h2>
+    <input type="text" id="codeIn" maxlength="6" placeholder="예: K7P2QM" style="font-size:28px;letter-spacing:.15em;text-transform:uppercase" autocomplete="off">
+    <div class="row"><button class="btn" id="codeGo" type="button">들어가기</button></div>
+    <p class="muted" id="codeMsg">${CFG.REGISTRY_URL ? '' : '이 사이트는 반코드 대신 선생님이 주신 QR이나 링크로 들어와요.'}</p>`);
+  codeGo.onclick = async () => {
+    const code = codeIn.value.trim().toUpperCase();
+    if(code.length !== 6){ codeMsg.textContent = '반코드는 6글자예요.'; return; }
+    if(!CFG.REGISTRY_URL){ codeMsg.textContent = '선생님께 QR이나 링크를 받아 주세요.'; return; }
+    codeMsg.textContent = '찾는 중…';
+    const ok = await lookupCode(code);
+    if(!ok){ codeMsg.textContent = '없는 반코드예요. 한 글자씩 다시 확인해 주세요.'; return; }
+    nameEntry();
+  };
+}
+
+async function lookupCode(code){
+  try{
+    const r = await (await fetch(`${CFG.REGISTRY_URL}?action=lookup&code=${encodeURIComponent(code)}`)).json();
+    if(!r.ok) return false;
+    CLASS = {url:r.url, name:r.name, code:r.code};
+    LS.set('class', CLASS);
+    return true;
+  }catch(e){ return false; }
+}
+
+function nameEntry(){
+  const prev = LS.get('student', {number:'', name:''});
+  show(`<h2>${esc(CLASS.name)}</h2>
+    <p>번호와 이름(또는 별명)을 적어 주세요. 답은 우리 선생님께만 가요.</p>
+    <label class="field" for="stNum">번호</label><input type="number" id="stNum" min="1" max="60" value="${esc(prev.number)}" inputmode="numeric">
+    <label class="field" for="stName">이름 또는 별명</label><input type="text" id="stName" maxlength="12" value="${esc(prev.name)}">
+    <div class="row"><button class="btn" id="stGo" type="button">시작하기</button></div>
+    <p class="muted" id="stMsg"></p>`);
+  stGo.onclick = () => {
+    const number = stNum.value.trim(), name = stName.value.trim();
+    if(!number || !name){ stMsg.textContent = '번호와 이름을 모두 적어 주세요.'; return; }
+    STUDENT = {number, name}; LS.set('student', STUDENT);
+    studentHome();
+  };
+}
+
+function studentHome(){
+  if(DAY.hidden){ return hiddenDay(); }
+  const doneKey = `done:${DAY.date}:${CLASS ? CLASS.url : 'tv'}`;
+  state = LS.get(`ans:${DAY.date}`, {});
+  show(`${banners(false)}
+    <p>${esc(STUDENT.name)} 학생, 좋은 아침이에요.</p>
+    <div class="today"><span class="tag ${DAY.main.type}">${TYPE_NAME[DAY.main.type]}</span>
+      <h2 style="margin-top:10px">${esc(DAY.main.title)}</h2>
+      <p class="muted">영상 보기 3~5분, 학습지 10~15분</p>
+      ${LS.get(doneKey, false) ? '<p><b>오늘 학습지를 이미 냈어요.</b> 다시 풀어도 돼요.</p>' : ''}
+      <div class="row"><button class="btn sun" id="startBtn" type="button">시작하기</button></div>
+    </div>
+    <p class="muted">연속 학습: <b>${streak()}일</b></p>`);
+  startBtn.onclick = () => { tvMode = false; step(0); };
+}
+
+function hiddenDay(){
+  const prev = INDEX.find(e => !e.hidden && e.date < DAY.date);
+  show(`<h2>오늘 뉴스는 쉬어 가요</h2><p>선생님 검토로 오늘 학습지는 내렸어요.</p>
+    ${prev ? `<div class="row"><a class="btn" href="?date=${prev.date}${CLASS && CLASS.code ? '&c='+CLASS.code : ''}">지난 학습지 풀기 (${prev.date})</a></div>` : ''}`);
+}
+
+function streak(){
+  const days = LS.get('doneDays', []);
+  let n = 0, d = new Date(todayKST());
+  const set = new Set(days);
+  for(let i=0;i<60;i++){
+    const s = d.toISOString().slice(0,10), wd = d.getUTCDay();
+    if(set.has(s)) n++;
+    else if(wd !== 0 && wd !== 6 && i > 0) break;
+    d.setUTCDate(d.getUTCDate()-1);
+  }
+  return n;
+}
+
+/* ───── 학생 단계 ───── */
+let tvMode = false;
+const STEPS = ['영상 보기','오늘의 낱말','요약과 육하원칙','핵심 활동','사실일까 의견일까','마무리'];
+function save(){ LS.set(`ans:${DAY.date}`, state); }
+
+function step(i){
+  const m = DAY.main;
+  const bar = `<div class="progress" aria-hidden="true">${STEPS.map((_,k) => `<i class="${k<i?'done':k===i?'on':''}"></i>`).join('')}</div>
+    <p class="step-name">${i+1} / ${STEPS.length} · ${STEPS[i]}${tvMode ? ' · TV 화면' : ''}</p>`;
+  const nav = (nextLabel='다음', canNext=true) => `<div class="nav">
+    ${i>0 ? `<button class="btn ghost" id="prev" type="button">이전</button>` : '<span></span>'}
+    <button class="btn" id="next" type="button" ${canNext?'':'disabled'}>${nextLabel}</button></div>`;
+  let body = '';
+
+  if(i===0){
+    body = m.video ? `<div class="video"><div id="yt"></div>
+        <div class="cover" id="vCover" hidden><div><p style="font-size:22px">영상을 다 봤어요</p><button class="btn sun" id="toSheet" type="button">학습지 시작하기</button></div></div></div>
+        <p class="muted">${esc(m.video.channel)} 공식 채널 영상 · 영상이 안 나오면 <a href="${esc(m.link)}" target="_blank" rel="noopener">기사 원문</a>을 보세요.</p>`
+      : `<div class="panel"><h3>오늘은 영상 대신 요약을 먼저 읽어요</h3><p>${(m.summary||[]).map(esc).join(' ')}</p>
+        <p class="muted"><a href="${esc(m.link)}" target="_blank" rel="noopener">기사 원문 (${esc(m.source)})</a></p></div>`;
+    show(bar + `<h2>${esc(m.title)}</h2>` + body + nav());
+    if(m.video) mountYT(m.video.id);
+  }
+
+  if(i===1){
+    state.words = state.words || {};
+    const words = m.words || [];
+    body = words.map((w, wi) => {
+      const opts = shuffleSeeded([w.meaning, ...(w.wrong||[])], DAY.date + w.word);
+      const picked = state.words[wi];
+      return `<div class="panel"><h3>${esc(w.word)}</h3><div class="opts">${opts.map(o => {
+        let cls = 'opt';
+        if(picked !== undefined){ if(o===w.meaning) cls += ' right'; else if(o===picked) cls += ' wrong'; }
+        return `<button class="${cls}" data-w="${wi}" data-o="${esc(o)}" type="button" ${picked!==undefined?'disabled':''}>${esc(o)}</button>`;
+      }).join('')}</div></div>`;
+    }).join('');
+    show(bar + `<h2>뜻을 골라 보세요</h2>` + body + nav('다음', Object.keys(state.words).length === words.length));
+    document.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { state.words[b.dataset.w] = b.dataset.o; save(); step(1); });
+  }
+
+  if(i===2){
+    const fw = m.five_w || {};
+    const L = {who:'누가',when:'언제',where:'어디서',what:'무엇을',how:'어떻게',why:'왜'};
+    state.w5 = state.w5 || {};
+    body = `<div class="panel"><h3>쉬운 요약</h3><p>${(m.summary||[]).map(esc).join(' ')}</p></div>
+      <div class="panel"><h3>육하원칙</h3><p class="muted">먼저 머릿속으로 답해 보고, 눌러서 확인해요. '기사에 없음'도 중요한 발견이에요.</p>
+      <div class="w5">${Object.keys(L).map(k => `<button type="button" data-k="${k}" class="${state.w5[k]?'open':''}"><b>${L[k]}</b>${state.w5[k] ? esc(fw[k]) : '눌러서 확인'}</button>`).join('')}</div></div>`;
+    show(bar + body + nav());
+    document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { state.w5[b.dataset.k] = true; save(); step(2); });
+  }
+
+  if(i===3){ activityStep(bar, nav); }
+
+  if(i===4){
+    state.fo = state.fo || {};
+    const fo = m.facts_opinions || [];
+    body = fo.map((f, k) => {
+      const p = state.fo[k];
+      return `<div class="fo"><div>${esc(f.sentence)}</div>
+        <div class="row"><button type="button" class="f ${p==='사실'?'sel':''}" data-f="${k}" data-v="사실" ${p?'disabled':''}>사실</button>
+        <button type="button" class="o ${p==='의견'?'sel':''}" data-f="${k}" data-v="의견" ${p?'disabled':''}>의견</button></div>
+        ${p ? `<div class="why">${p===f.answer ? '맞아요.' : `정답은 <b>${esc(f.answer)}</b>이에요.`} ${esc(f.reason)}</div>` : ''}</div>`;
+    }).join('');
+    show(bar + `<h2>사실일까, 의견일까?</h2><p class="muted">사실은 확인할 수 있는 일, 의견은 사람마다 다를 수 있는 생각이에요.</p>` + body + nav('다음', Object.keys(state.fo).length === fo.length));
+    document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { state.fo[b.dataset.f] = b.dataset.v; save(); step(4); });
+  }
+
+  if(i===5){ finishStep(bar); return; }
+
+  const prev = document.getElementById('prev'), next = document.getElementById('next');
+  if(prev) prev.onclick = () => step(i-1);
+  if(next) next.onclick = () => step(i+1);
+}
+
+function writeBox(k, q, bare){
+  const inner = `<p><b>${esc(q)}</b></p><textarea data-wr="${k}" placeholder="${tvMode ? '함께 이야기 나눠요' : '여기에 써요'}">${esc(state[k]||'')}</textarea>`;
+  return bare ? inner : `<div class="panel">${inner}</div>`;
+}
+function bindWrites(){ document.querySelectorAll('[data-wr]').forEach(t => t.oninput = () => { state[t.dataset.wr] = t.value; save(); }); }
+
+function activityStep(bar, nav){
+  const m = DAY.main, a = m.activity || {};
+  let body = '';
+  if(m.type === 'useful'){
+    body = `<h2>이 뉴스, 나와 어떤 관계가 있을까?</h2>` + writeBox('impact_question', a.impact_question) + writeBox('wonder_question', a.wonder_question);
+  }
+  if(m.type === 'debate'){
+    const side = s => `<button type="button" class="side ${s} ${state.side===s?'picked':''}" data-side="${s}">
+      <b>${esc(a['side_'+s].title)}</b><ul>${(a['side_'+s].reasons||[]).map(r => `<li>${esc(r)}</li>`).join('')}</ul></button>`;
+    body = `<h2>${esc(a.issue)}</h2><p class="muted">두 입장 모두 이유가 있어요. 내 생각과 가까운 쪽을 눌러요.</p>
+      <div class="sides">${side('a')}${side('b')}</div>` +
+      writeBox('choose_question', a.choose_question) + writeBox('other_side_question', a.other_side_question);
+  }
+  if(m.type === 'media'){
+    const hs = m.headlines || [];
+    body = `<h2>같은 사건, 다른 제목</h2>
+      <div class="heads">${hs.map(h => `<div class="head"><small>${esc(h.source)}</small>${esc(h.title)}</div>`).join('')}</div>` +
+      `<div class="panel"><p><b>제목들이 주는 느낌은 어떤가요?</b></p><div class="opts">${(a.feeling_choices||[]).map(c =>
+        `<button type="button" class="opt ${state.feeling===c?'picked':''}" data-feel="${esc(c)}">${esc(c)}</button>`).join('')}</div></div>` +
+      writeBox('why_question', a.why_question) + writeBox('rewrite_question', a.rewrite_question);
+  }
+  show(bar + body + nav());
+  bindWrites();
+  document.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { state.side = b.dataset.side; save(); keepScroll(() => step(3)); });
+  document.querySelectorAll('[data-feel]').forEach(b => b.onclick = () => { state.feeling = b.dataset.feel; save(); keepScroll(() => step(3)); });
+  document.getElementById('prev').onclick = () => step(2);
+  document.getElementById('next').onclick = () => step(4);
+}
+function keepScroll(fn){ const y = window.scrollY; fn(); window.scrollTo({top:y}); }
+
+function collectAnswers(){
+  const m = DAY.main, a = m.activity || {};
+  const out = [];
+  const push = (q, v) => { if(q) out.push({q, a: v || ''}); };
+  if(m.type === 'useful'){ push(a.impact_question, state.impact_question); push(a.wonder_question, state.wonder_question); }
+  if(m.type === 'debate'){
+    const pick = state.side ? a['side_'+state.side].title : '(고르지 않음)';
+    push(a.choose_question, `[${pick}] ${state.choose_question||''}`);
+    push(a.other_side_question, state.other_side_question);
+  }
+  if(m.type === 'media'){
+    push('제목이 주는 느낌', state.feeling);
+    push(a.why_question, state.why_question);
+    push(a.rewrite_question, state.rewrite_question);
+  }
+  if(m.challenge && state.challenge) push('[도전] ' + m.challenge, state.challenge);
+  return out.slice(0, 5);
+}
+function scores(){
+  const m = DAY.main;
+  const w = (m.words||[]).filter((x,k) => state.words && state.words[k] === x.meaning).length;
+  const f = (m.facts_opinions||[]).filter((x,k) => state.fo && state.fo[k] === x.answer).length;
+  return {w, wn:(m.words||[]).length, f, fn:(m.facts_opinions||[]).length};
+}
+
+function challengeBox(){
+  const m = DAY.main;
+  if(!m.challenge) return '';
+  if(tvMode) return `<div class="panel"><p class="muted">더 생각해 보기 (6학년 도전)</p><p><b>${esc(m.challenge)}</b></p></div>`;
+  return `<details class="panel" ${state.challenge?'open':''}><summary><b>도전 문항</b> (6학년이나 빨리 끝낸 친구, 선택)</summary>${writeBox('challenge', m.challenge, true)}</details>`;
+}
+
+function finishStep(bar){
+  const s = scores();
+  if(tvMode || !CLASS){
+    show(bar + challengeBox() + `<div class="panel done-card"><div class="medal" aria-hidden="true">☀️</div><h2>오늘의 시사 끝!</h2>
+      <p>낱말 ${s.w}/${s.wn} · 사실·의견 ${s.f}/${s.fn}</p>
+      <div class="row" style="justify-content:center"><button class="btn ghost" id="prev" type="button">이전</button>
+      <button class="btn" id="back" type="button">${tvMode ? '교사 화면으로' : '처음으로'}</button></div></div>`);
+    prev.onclick = () => step(4);
+    bindWrites();
+    back.onclick = () => tvMode ? teacherView('news') : home();
+    return;
+  }
+  const ans = collectAnswers();
+  const empty = ans.filter(x => !x.a || x.a.endsWith('] ')).length;
+  show(bar + `<h2>선생님께 보내기</h2>${challengeBox()}
+    <div class="panel"><p>낱말 <b>${s.w}/${s.wn}</b> · 사실·의견 <b>${s.f}/${s.fn}</b></p>
+    ${ans.map(x => `<p class="muted">${esc(x.q)}</p><div class="answer">${esc(x.a) || '<i>비어 있어요</i>'}</div>`).join('')}</div>
+    ${empty ? `<p class="muted">빈 칸이 ${empty}개 있어요. 그래도 보낼 수 있어요.</p>` : ''}
+    <div class="nav"><button class="btn ghost" id="prev" type="button">고치러 가기</button>
+    <button class="btn sun" id="send" type="button">${esc(CLASS.name)} 선생님께 보내기</button></div>
+    <p class="muted" id="sendMsg"></p>`);
+  prev.onclick = () => step(4);
+  bindWrites();
+  send.onclick = () => submit(collectAnswers(), s);
+}
+
+async function submit(ans, s){
+  send.disabled = true; sendMsg.textContent = '보내는 중…';
+  const payload = JSON.stringify({app:'today-news', date:DAY.date, title:DAY.main.title, number:STUDENT.number, name:STUDENT.name,
+    words_score:`${s.w}/${s.wn}`, fo_score:`${s.f}/${s.fn}`, answers:ans});
+  let ok = false;
+  try{
+    const r = await fetch(CLASS.url, {method:'POST', body:payload});
+    const j = await r.json(); ok = !!j.ok;
+  }catch(e){
+    try{ await fetch(CLASS.url, {method:'POST', body:payload, mode:'no-cors'}); ok = true; }catch(e2){ ok = false; }
+  }
+  if(!ok){ send.disabled = false; sendMsg.textContent = '보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요. (쓴 답은 이 기기에 남아 있어요)'; return; }
+  LS.set(`done:${DAY.date}:${CLASS.url}`, true);
+  const days = new Set(LS.get('doneDays', [])); days.add(DAY.date); LS.set('doneDays', [...days].slice(-120));
+  const n = streak();
+  show(`<div class="panel done-card"><div class="medal" aria-hidden="true">${n>=10?'🏅':n>=5?'⭐':'☀️'}</div>
+    <h2>잘 보냈어요!</h2><p>연속 학습 <b>${n}일</b>째예요.${n===5?' 5일 연속 별을 받았어요!':''}${n===10?' 10일 연속 메달을 받았어요!':''}</p>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="back" type="button">처음으로</button></div></div>`);
+  back.onclick = studentHome;
+}
+
+/* ───── 유튜브 (끝나면 추천 영상 대신 학습지 버튼으로 덮기) ───── */
+let ytPlayer = null;
+function mountYT(id){
+  const start = () => {
+    ytPlayer = new YT.Player('yt', {
+      host:'https://www.youtube-nocookie.com', videoId:id,
+      playerVars:{rel:0, modestbranding:1, playsinline:1, iv_load_policy:3, fs:1},
+      events:{onStateChange: e => {
+        const cover = document.getElementById('vCover'); if(!cover) return;
+        if(e.data === YT.PlayerState.ENDED){ cover.hidden = false; }
+        if(e.data === YT.PlayerState.PLAYING){ cover.hidden = true; }
+      }}
+    });
+    const ts = document.getElementById('toSheet'); if(ts) ts.onclick = () => step(1);
+  };
+  if(window.YT && window.YT.Player) return start();
+  window.onYouTubeIframeAPIReady = start;
+  if(!document.getElementById('ytapi')){
+    const s = document.createElement('script'); s.id = 'ytapi'; s.src = 'https://www.youtube.com/iframe_api';
+    s.onerror = () => { const v = document.querySelector('.video'); if(v) v.outerHTML = `<div class="panel"><p>이 기기에서는 영상이 열리지 않아요. 요약을 먼저 읽어요.</p><p>${(DAY.main.summary||[]).map(esc).join(' ')}</p></div>`; };
+    document.head.appendChild(s);
+  }
+}
+
+function shuffleSeeded(arr, seed){
+  let h = 0; for(const c of seed) h = (h*31 + c.charCodeAt(0)) >>> 0;
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ h = (h*1103515245 + 12345) >>> 0; const j = h % (i+1); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+
+/* ───── 인쇄 ───── */
+function printSheet(withAnswers){
+  const m = DAY.main, a = m.activity || {}, t = m.teacher || {};
+  const lines = n => Array.from({length:n}, () => '<div class="lines"></div>').join('');
+  const L = {who:'누가',when:'언제',where:'어디서',what:'무엇을',how:'어떻게',why:'왜'};
+  const L3 = {who:'누가', what:'무엇을', why:'왜'};
+  let act = '';
+  if(m.type === 'useful') act = `<b class="t">③ 나와 어떤 관계가 있을까?</b>
+      <p class="q">✏️ ${esc(a.impact_question)}</p>${lines(2)}<p class="q">✏️ ${esc(a.wonder_question)}</p>${lines(2)}`;
+  if(m.type === 'debate') act = `<b class="t">③ ${esc(a.issue)}</b>
+      <div class="two">${['a','b'].map(s => `<div class="side-p"><b>□ ${esc(a['side_'+s].title)}</b><br>${(a['side_'+s].reasons||[]).map(esc).join(' ')}</div>`).join('')}</div>
+      <p class="q">✏️ ${esc(a.choose_question)}</p>${lines(2)}<p class="q">✏️ ${esc(a.other_side_question)}</p>${lines(2)}`;
+  if(m.type === 'media') act = `<b class="t">③ 같은 사건, 다른 제목</b>
+      <table>${(m.headlines||[]).map(h => `<tr><td style="width:20%">${esc(h.source)}</td><td>${esc(h.title)}</td></tr>`).join('')}</table>
+      <p>제목들의 느낌에 ○ 하세요: ${(a.feeling_choices||[]).map(c => `(　) ${esc(c)}`).join('　')}</p>
+      <p class="q">✏️ ${esc(a.why_question)}</p>${lines(2)}<p class="q">✏️ ${esc(a.rewrite_question)}</p>${lines(2)}`;
+  let html = `<h1>${esc(m.title)}</h1>
+    <div class="meta"><span>오늘의 시사 · ${esc(DAY.date)} · 출처 ${esc(m.source)} (새로 쓴 요약, AI 생성)</span><span>____학년 ____번 이름: __________</span></div>
+    <div class="box"><b class="t">① 오늘의 낱말 — 알맞은 뜻에 ○ 하세요</b>
+      <table>${(m.words||[]).map(w => `<tr><td style="width:16%"><b>${esc(w.word)}</b></td><td>${shuffleSeeded([w.meaning,...(w.wrong||[])], DAY.date+w.word).map(o=>`(　) ${esc(o)}`).join('　　')}</td></tr>`).join('')}</table></div>
+    <div class="box"><b class="t">② 읽고 채우기</b><p>${(m.summary||[]).map(esc).join(' ')}</p>
+      <table class="w3"><tr>${Object.values(L3).map(v=>`<th>${v}</th>`).join('')}</tr><tr>${Object.keys(L3).map(()=>'<td></td>').join('')}</tr></table>
+      <p class="small">기사에 없으면 '기사에 없음'이라고 써요.</p></div>
+    <div class="box">${act}</div>
+    <div class="box"><b class="t">④ 사실이면 '사', 의견이면 '의'</b>
+      <table>${(m.facts_opinions||[]).map(f=>`<tr><td>${esc(f.sentence)}</td><td style="width:14mm"></td></tr>`).join('')}</table></div>`;
+  if(withAnswers){
+    html += `<div class="pb"></div><h1>정답과 예시 답안</h1>
+      <div class="box"><b class="t">낱말</b>${(m.words||[]).map(w=>`<p>${esc(w.word)}: ${esc(w.meaning)}</p>`).join('')}</div>
+      <div class="box"><b class="t">육하원칙</b><table><tr>${Object.values(L).map(v=>`<th>${v}</th>`).join('')}</tr><tr>${Object.keys(L).map(k=>`<td>${esc((m.five_w||{})[k])}</td>`).join('')}</tr></table></div>
+      <div class="box"><b class="t">사실·의견</b>${(m.facts_opinions||[]).map(f=>`<p>${esc(f.sentence)} → <b>${esc(f.answer)}</b> (${esc(f.reason)})</p>`).join('')}</div>
+      <div class="box"><b class="t">예시 답안</b>${Object.entries(t.sample_answers||{}).map(([k,v])=>`<p><b>${esc(questionLabel(k))}</b><br>${esc(v)}</p>`).join('')}</div>
+      <div class="box"><b class="t">더 물어볼 질문 · 주의할 점</b>${(t.extra_questions||[]).map(q=>`<p>· ${esc(q)}</p>`).join('')}${(t.cautions||[]).map(q=>`<p>※ ${esc(q)}</p>`).join('')}</div>
+      <div class="box"><b class="t">교과 연계</b>${(m.curriculum||[]).map(c=>`<p>${esc(c)}</p>`).join('')}</div>`;
+  }
+  document.getElementById('print').innerHTML = html;
+  window.print();
+}
+
+/* ───── 지난 학습지 ───── */
+function archive(){
+  const list = INDEX.filter(e => !e.hidden);
+  show(`<h2>지난 학습지</h2>${list.length ? `<ul class="archive">${list.map(e => `<li><a href="?date=${e.date}${CLASS && CLASS.code ? '&c='+CLASS.code : ''}">${e.date}</a> · <span class="tag ${e.type}">${TYPE_NAME[e.type]||''}</span> ${esc(e.title)}</li>`).join('')}</ul>` : '<p class="muted">아직 쌓인 학습지가 없어요.</p>'}`);
+}
+
+/* ───── 시작 ───── */
+async function boot(){
+  try{ DAY = await loadDay(qs.get('date')); }
+  catch(e){ show(`<h2>학습지를 불러오지 못했어요</h2><p>잠시 뒤 새로고침해 주세요. 계속 안 되면 선생님께 알려 주세요.</p>`); return; }
+  setStamp(DAY.date);
+  document.getElementById('brandTitle').textContent = CFG.SITE_TITLE || '오늘의 시사';
+  // 학생 링크로 들어온 경우
+  const c = qs.get('c'), u = qs.get('u');
+  if(u && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u)){
+    CLASS = {url:u, name:qs.get('n') || '우리 반', code:''}; LS.set('class', CLASS);
+  } else if(c && CFG.REGISTRY_URL){
+    const saved = LS.get('class', null);
+    if(saved && saved.code === c.toUpperCase()) CLASS = saved;
+    else if(!(await lookupCode(c.toUpperCase()))){ show(`<h2>반을 찾지 못했어요</h2><p>선생님께 새 링크를 받아 주세요.</p>`); return; }
+  }
+  if(CLASS){
+    const st = LS.get('student', null);
+    if(st && st.number && st.name){ STUDENT = st; return studentHome(); }
+    return nameEntry();
+  }
+  if(DAY.hidden && !qs.get('date')) return hiddenDay();
+  home();
+}
+boot();
+})();
+</script>
+</body>
+</html>
