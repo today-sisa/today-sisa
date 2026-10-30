@@ -8,7 +8,13 @@
  * 설치: 새 구글 시트 → [확장 프로그램] → [Apps Script] → 이 코드 붙여 넣기 → 저장
  *       → [배포] → [새 배포] → 웹 앱 / 실행: 나 / 액세스: 모든 사용자 → 배포
  *       → 나온 웹 앱 URL을 사이트의 config.js 의 REGISTRY_URL 에 넣습니다.
+ *
+ * '개발자에게' 건의가 오면 '의견' 탭에 쌓이고 NOTIFY_EMAIL 로 메일이 갑니다.
+ * 코드를 바꾼 뒤에는 [배포 → 배포 관리 → 연필 → 버전: 새 버전 → 배포]를 하고,
+ * 메일 보내기 권한을 처음 한 번 허용해야 합니다. (편집기에서 testMail 실행 → 권한 허용)
  */
+
+const NOTIFY_EMAIL = 'bohwan96@naver.com';   // 건의 알림을 받을 메일 (비우면 메일 안 보냄)
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 헷갈리는 0,O,1,I 제외
 
@@ -23,7 +29,7 @@ function tab_(name, headers) {
   return sh;
 }
 const classes_ = () => tab_('반', ['반코드', '시트 주소', '반 이름', '학교', '만든 날']);
-const feedback_ = () => tab_('의견', ['보낸 시각', '뉴스 날짜', '이유', '메모']);
+const feedback_ = () => tab_('의견', ['보낸 시각', '뉴스 날짜', '종류', '내용', '연락처', '화면']);
 
 function out_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
@@ -36,6 +42,27 @@ function newCode_(existing) {
     if (!existing.has(c)) return c;
   }
   throw new Error('코드 생성 실패');
+}
+
+/** 건의 메일 (하루 최대 30통까지만, 장난 폭주 방지) */
+function notify_(kind, text, contact, page) {
+  if (!NOTIFY_EMAIL || !text) return;
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const today = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd');
+    const key = 'mail_' + today;
+    const n = Number(props.getProperty(key) || 0);
+    if (n >= 30) return;
+    props.setProperty(key, String(n + 1));
+    MailApp.sendEmail(NOTIFY_EMAIL, '[오늘의 시사] ' + (kind || '의견') + ' 도착',
+      '종류: ' + kind + '\n내용:\n' + text + '\n\n연락처: ' + (contact || '-') + '\n화면: ' + (page || '-') +
+      '\n\n모든 의견은 등록소 시트의 \'의견\' 탭에 있습니다.\n' + SpreadsheetApp.getActiveSpreadsheet().getUrl());
+  } catch (err) { /* 메일 권한이 없으면 시트에만 저장 */ }
+}
+
+/** 편집기에서 한 번 실행해 메일 권한을 허용하세요 */
+function testMail() {
+  MailApp.sendEmail(NOTIFY_EMAIL, '[오늘의 시사] 메일 알림 시험', '건의 알림이 이 메일로 옵니다.');
 }
 
 function doGet(e) {
@@ -77,8 +104,12 @@ function doGet(e) {
     }
 
     if (action === 'feedback') {
-      feedback_().appendRow([new Date(), String(p.date || '').slice(0, 12),
-        String(p.reason || '').slice(0, 40), String(p.memo || '').slice(0, 300)]);
+      const kind = String(p.kind || p.reason || '').slice(0, 40);
+      const text = String(p.text || p.memo || '').slice(0, 1000);
+      const contact = String(p.contact || '').slice(0, 100);
+      const page = String(p.page || '').slice(0, 200);
+      feedback_().appendRow([new Date(), String(p.date || '').slice(0, 12), kind, text, contact, page]);
+      notify_(kind, text, contact, page);
       return out_({ ok: true });
     }
 

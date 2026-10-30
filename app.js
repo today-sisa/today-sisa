@@ -51,11 +51,14 @@ function go(view, params = {}, replace = false){
 function render(st){
   depth = st.d || 0;
   document.getElementById('backBtn').hidden = depth <= 0;
+  document.getElementById('devBtn').hidden = !(TEACHER_VIEWS.has(st.view) && teacherOK());
   (VIEWS[st.view] || VIEWS.home)(st.params || {});
   window.scrollTo({top:0});
 }
 window.addEventListener('popstate', e => { if(e.state) render(e.state); });
+const TEACHER_VIEWS = new Set(['teacherHome','teacherMode','guide','share','results','classSetup','classReady','devNote']);
 document.getElementById('backBtn').onclick = () => history.back();
+document.getElementById('devBtn').onclick = () => go('devNote', {from: (history.state && history.state.view) || ''});
 document.getElementById('homeBtn').onclick = () => go(soloMode && ITEM ? 'soloHome' : CLASS && STUDENT ? 'studentHome' : 'home', soloMode && ITEM ? {r:ITEM.rank} : {});
 function show(html, wide){ $app.innerHTML = html; $app.classList.toggle('wide', !!wide); }
 
@@ -118,22 +121,53 @@ VIEWS.teacherGate = () => {
 const teacherOK = () => LS.get('teacherOK', '') === CFG.TEACHER_PASS_SHA256;
 
 /* ───────── 교사: 오늘의 뉴스 1~5순위 ───────── */
+/* ───────── 교사: 학습지 방식 (종이 / 웹앱) ───────── */
+function getMode(){
+  const m = LS.get('mode', '');
+  if(m === 'paper' || m === 'web') return m;
+  return LS.get('myClass', null) ? 'web' : '';
+}
+VIEWS.teacherMode = () => {
+  if(!teacherOK()) return go('teacherGate', {}, true);
+  const cur = getMode();
+  show(`<h2>학습지를 어떻게 쓰실 건가요?</h2>
+    <p class="muted">언제든 선생님 화면 위쪽에서 바꿀 수 있어요.</p>
+    <div class="choice two-col mode-pick">
+      <button class="big ${cur==='paper'?'picked-mode':''}" id="mPaper" type="button">
+        <strong>🖨️ 종이 학습지</strong>
+        <span><b>설정 0분</b> · 바로 인쇄<br>아이들은 QR로 <b>영상만</b> 보고, 종이에 써요<br>기기가 없거나 손으로 쓰는 게 좋은 반</span></button>
+      <button class="big ${cur==='web'?'picked-mode':''}" id="mWeb" type="button">
+        <strong>📱 웹앱 학습지</strong>
+        <span><b>처음 한 번 3분</b> (반 만들기)<br>아이들이 QR·반코드로 들어와 <b>기기에서 풀고 보내요</b><br>답이 내 구글 시트로 모이고 그래프로 한눈에</span></button>
+    </div>
+    <p class="muted">어느 쪽이든 매일 아침에는 뉴스 하나 고르는 클릭 한 번이면 돼요.</p>`);
+  mPaper.onclick = () => { LS.set('mode', 'paper'); go('teacherHome', {}, true); };
+  mWeb.onclick = () => { LS.set('mode', 'web'); go(LS.get('myClass', null) ? 'teacherHome' : 'classSetup', {}, true); };
+};
+
 VIEWS.teacherHome = () => {
   if(!teacherOK()) return go('teacherGate', {}, true);
-  const mine = LS.get('myClass', null);
+  const mode = getMode();
+  if(!mode) return go('teacherMode', {}, true);
+  const paper = mode === 'paper';
+  const mine = paper ? null : LS.get('myClass', null);
   const topicRank = mine ? LS.get(`topic:${mine.url}:${DAY.date}`, null) : null;
   show(`${banners(false)}
-    <div class="panel">${mine
+    <div class="mode-bar">지금: <b>${paper ? '🖨️ 종이 학습지' : '📱 웹앱 학습지'}</b> <button class="link-btn" id="chMode" type="button">바꾸기</button></div>
+    ${paper ? '' : `<div class="panel">${mine
       ? `<b>우리 반: ${esc(mine.name)}</b>${mine.code ? ` · 반코드 <b>${esc(mine.code)}</b>` : ''}
          <p class="muted" id="topicNow">오늘 주제: ${topicRank ? `${topicRank}순위` : '아직 고르지 않음 (고를 때까지 아이들은 기다리는 화면을 봐요)'}</p>
          <div class="row"><button class="btn sun small-btn" id="toRes" type="button">답 모아 보기</button>
            <button class="btn ghost small-btn" id="toQR" type="button">QR·반 링크 보기</button>
            ${mine.sheetUrl ? `<a class="btn ghost small-btn" href="${esc(mine.sheetUrl)}" target="_blank" rel="noopener">내 답안 시트 열기</a>` : ''}</div>`
-      : `<b>학생과 함께 하려면</b><p class="muted">내 구글 시트를 연결해 반을 만들면, 아이들은 QR·반코드로 들어오고 답이 시트로 모여요. 인쇄만 하실 거면 안 하셔도 돼요.</p>
-         <div class="row"><button class="btn ghost small-btn" id="toSetup" type="button">반 만들기 (5분)</button></div>`}
-    </div>
+      : `<b>먼저 반을 만들어 주세요 (처음 한 번 3분)</b><p class="muted">내 구글 시트를 연결하면 반코드와 QR이 생기고, 아이들 답이 시트로 모여요.</p>
+         <div class="row"><button class="btn sun" id="toSetup" type="button">반 만들기</button></div>`}
+    </div>`}
     <h2>오늘의 뉴스</h2>
-    <p class="muted">${mine ? '하나를 골라 <b>우리 반 주제로 정하기</b>를 누르면 QR·반코드 화면이 크게 떠요. 아이들 화면에도 그 뉴스가 떠요.' : '학습지 인쇄, 교사용 자료, TV 화면을 바로 쓸 수 있어요. <b>QR 크게 띄우기</b>를 누르면 아이들이 QR로 영상을 각자 볼 수 있어요.'}</p>
+    <p class="muted">${paper
+      ? '하나를 골라 <b>학습지 인쇄</b>를 누르세요. <b>QR 크게 띄우기</b>를 누르면 아이들이 QR로 영상을 각자 볼 수 있어요.'
+      : mine ? '하나를 골라 <b>우리 반 주제로 정하기</b>를 누르면 QR·반코드 화면이 크게 떠요. 아이들 화면에도 그 뉴스가 떠요.'
+      : '반을 만들면 여기서 <b>우리 반 주제로 정하기</b>를 할 수 있어요.'}</p>
     <ol class="rank-list">${DAY.items.map(it => `
       <li><span class="num">${it.rank}</span><div>
         <span class="tag ${it.type}">${TYPE_NAME[it.type]}</span><span class="tag cat">${esc(it.category)}</span>
@@ -143,9 +177,10 @@ VIEWS.teacherHome = () => {
         <p class="muted">선정 이유: ${esc(it.reason)}</p>
         <div class="row">
           ${mine && full(it) ? `<button class="btn ${topicRank === it.rank ? 'ghost' : 'sun'} small-btn" data-topic="${it.rank}" type="button">${topicRank === it.rank ? '✓ 우리 반 주제' : '우리 반 주제로 정하기'}</button>` : ''}
-          ${full(it) && (!mine || topicRank === it.rank) ? `<button class="btn ${mine ? 'sun' : 'ghost'} small-btn" data-share="${it.rank}" type="button">QR 크게 띄우기</button>` : ''}
+          ${paper && full(it) ? `<button class="btn sun small-btn" data-print="${it.rank}" type="button">학습지 인쇄</button>` : ''}
+          ${full(it) && (paper || (mine && topicRank === it.rank)) ? `<button class="btn ${paper ? 'ghost' : 'sun'} small-btn" data-share="${it.rank}" type="button">QR 크게 띄우기${paper ? ' (영상)' : ''}</button>` : ''}
           ${full(it) ? `<button class="btn small-btn" data-tv="${it.rank}" type="button">TV 화면</button>
-            <button class="btn ghost small-btn" data-print="${it.rank}" type="button">학습지 인쇄</button>
+            ${paper ? '' : `<button class="btn ghost small-btn" data-print="${it.rank}" type="button">인쇄</button>`}
             <button class="btn ghost small-btn" data-guide="${it.rank}" type="button">교사용</button>` : ''}
           ${it.video ? `<a class="btn ghost small-btn" href="${videoLink(it.video)}" target="_blank" rel="noopener">영상 (${esc(it.video.channel)})</a>` : ''}
           <a class="btn ghost small-btn" href="${esc(it.link)}" target="_blank" rel="noopener">기사 원문 (${esc(it.source)})</a>
@@ -157,8 +192,9 @@ VIEWS.teacherHome = () => {
       <div class="row">${['너무 어려움','부적절함','지루함','기타'].map(r => `<button class="btn ghost small-btn" data-reason="${r}" type="button">${r}</button>`).join('')}</div>
       <input type="text" id="fbMemo" placeholder="한 줄 메모 (선택)"><p class="muted" id="fbMsg"></p>
     </details>${footer()}`);
+  chMode.onclick = () => go('teacherMode');
   if(mine){ toQR.onclick = () => go('classReady'); toRes.onclick = () => go('results', {r: topicRank || 1}); refreshTopic(mine); }
-  else toSetup.onclick = () => go('classSetup');
+  else if(!paper) toSetup.onclick = () => go('classSetup');
   document.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => setTopic(mine, Number(b.dataset.topic), b));
   document.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { ITEM = itemByRank(b.dataset.tv); tvMode = true; state = {}; STUDENT = {number:'', name:'우리 반'}; go('step', {i:0, r:ITEM.rank, tv:1}); });
   document.querySelectorAll('[data-share]').forEach(b => b.onclick = () => go('share', {r:Number(b.dataset.share)}));
@@ -210,11 +246,50 @@ async function sendFeedback(reason){
   }catch(e){ fbMsg.textContent = '보내지 못했어요. 인터넷 연결을 확인해 주세요.'; }
 }
 
+/* ───────── 개발자에게 (선생님 화면에서만) ───────── */
+VIEWS.devNote = ({from}) => {
+  if(!teacherOK()) return go('teacherGate', {}, true);
+  const KINDS = ['오류 신고', '기능 건의', '뉴스·학습지 의견', '기타'];
+  let kind = KINDS[0];
+  show(`<h2>개발자에게</h2>
+    <p class="muted">오류, 건의, 뉴스나 학습지에 대한 의견을 보내 주세요. 만든 선생님께 바로 전달돼요.</p>
+    <div class="row" id="kinds">${KINDS.map((k,i) => `<button class="btn ${i?'ghost':''} small-btn" data-kind="${k}" type="button">${k}</button>`).join('')}</div>
+    <label class="field" for="dnText">내용</label>
+    <textarea id="dnText" maxlength="800" placeholder="어떤 화면에서 무엇을 했을 때 어떤 일이 있었는지 적어 주시면 고치기 쉬워요."></textarea>
+    <label class="field" for="dnContact">답장 받을 곳 (선택)</label>
+    <input type="text" id="dnContact" maxlength="80" placeholder="인디스쿨 닉네임이나 메일">
+    <div class="row"><button class="btn sun" id="dnSend" type="button">보내기</button><span class="muted" id="dnMsg"></span></div>
+    <p class="muted">학생 이름 같은 개인 정보는 적지 말아 주세요.</p>`);
+  document.querySelectorAll('[data-kind]').forEach(b => b.onclick = () => {
+    kind = b.dataset.kind;
+    document.querySelectorAll('[data-kind]').forEach(x => x.classList.toggle('ghost', x !== b));
+  });
+  dnSend.onclick = async () => {
+    const text = dnText.value.trim();
+    if(text.length < 2){ dnMsg.textContent = '내용을 적어 주세요.'; return; }
+    if(!CFG.REGISTRY_URL){ dnMsg.textContent = '지금은 보낼 수 없어요. 인디스쿨 글에 댓글로 남겨 주세요.'; return; }
+    const last = LS.get('devNoteAt', 0);
+    if(Date.now() - last < 60000){ dnMsg.textContent = '잠시 뒤에 다시 보내 주세요. (1분에 한 번)'; return; }
+    dnSend.disabled = true; dnMsg.textContent = '보내는 중…';
+    const contact = dnContact.value.trim();
+    const page = `${from || '-'} · ${DAY.date} · ${navigator.userAgent.includes('Mobile') ? '모바일' : 'PC'}`;
+    const memo = `${text}${contact ? ` / 연락처: ${contact}` : ''} / 화면: ${page}`;
+    const q = new URLSearchParams({action:'feedback', date:DAY.date, reason:kind, memo, kind, text, contact, page});
+    try{
+      await fetch(`${CFG.REGISTRY_URL}?${q}`);
+      LS.set('devNoteAt', Date.now());
+      show(`<div class="panel done-card"><div class="medal" aria-hidden="true">💌</div><h2>보냈어요. 고맙습니다!</h2>
+        <div class="row" style="justify-content:center"><button class="btn ghost" id="dnBack" type="button">돌아가기</button></div></div>`);
+      dnBack.onclick = () => history.back();
+    }catch(e){ dnSend.disabled = false; dnMsg.textContent = '보내지 못했어요. 인터넷 연결을 확인해 주세요.'; }
+  };
+};
+
 /* ───────── 주제 공유: 큰 QR + 반코드 ───────── */
 
 VIEWS.share = ({r}) => {
   if(!teacherOK()) return go('teacherGate', {}, true);
-  const it = itemByRank(r), mine = LS.get('myClass', null);
+  const it = itemByRank(r), mine = getMode() === 'paper' ? null : LS.get('myClass', null);
   const link = mine ? classLink(mine) : reviewLink(it);   // 반이 없으면 영상 보기 화면으로
   show(`<div class="share">
       <p class="muted">${r}순위 · ${TYPE_NAME[it.type]}</p>
@@ -461,6 +536,7 @@ VIEWS.classSetup = async () => {
     }
     const key = (ping.version >= 2 && !ping.hasKey) ? await initKey(url) : '';
     LS.set('myClass', {url, name, code, sheetUrl: sheetLink, key});
+    LS.set('mode', 'web');
     go('classReady', {}, true);
   };
 };
