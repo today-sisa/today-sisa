@@ -175,7 +175,7 @@ def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> 
                 r = requests.post(
                     f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
                     headers={"x-goog-api-key": key, "Content-Type": "application/json"},
-                    json=body, timeout=120,
+                    json=body, timeout=300,
                 )
                 if r.status_code in (429, 500, 502, 503):
                     last = f"{model} {r.status_code}"
@@ -193,6 +193,10 @@ def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> 
             except (json.JSONDecodeError, KeyError, IndexError) as e:
                 last = f"{model} 응답 형식 오류 {e}"
                 time.sleep(3)
+            except requests.exceptions.RequestException as e:  # 시간 초과·연결 끊김 → 다시 시도
+                last = f"{model} 연결 문제 {str(e)[:80]}"
+                log(f"Gemini 연결 문제, 다시 시도 ({attempt + 1}/3): {model}")
+                time.sleep(10)
     raise RuntimeError(f"Gemini 호출 실패: {last}")
 
 
