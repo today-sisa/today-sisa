@@ -126,7 +126,8 @@ VIEWS.teacherHome = () => {
     <div class="panel">${mine
       ? `<b>우리 반: ${esc(mine.name)}</b>${mine.code ? ` · 반코드 <b>${esc(mine.code)}</b>` : ''}
          <p class="muted" id="topicNow">오늘 주제: ${topicRank ? `${topicRank}순위` : '아직 고르지 않음 (고르지 않으면 1순위로 진행)'}</p>
-         <div class="row"><button class="btn ghost small-btn" id="toQR" type="button">QR·반 링크 보기</button></div>`
+         <div class="row"><button class="btn ghost small-btn" id="toQR" type="button">QR·반 링크 보기</button>
+           ${mine.sheetUrl ? `<a class="btn ghost small-btn" href="${esc(mine.sheetUrl)}" target="_blank" rel="noopener">내 답안 시트 열기</a>` : ''}</div>`
       : `<b>학생과 함께 하려면</b><p class="muted">내 구글 시트를 연결해 반을 만들면, 아이들은 QR·반코드로 들어오고 답이 시트로 모여요. 인쇄만 하실 거면 안 하셔도 돼요.</p>
          <div class="row"><button class="btn ghost small-btn" id="toSetup" type="button">반 만들기 (5분)</button></div>`}
     </div>
@@ -166,6 +167,10 @@ VIEWS.teacherHome = () => {
 };
 
 async function refreshTopic(mine){
+  if(!mine.sheetUrl){
+    try{ const p = await (await fetch(mine.url + '?action=ping')).json();
+      if(p.sheetUrl){ LS.set('myClass', {...mine, sheetUrl:p.sheetUrl}); } }catch(e){}
+  }
   try{
     const r = await (await fetch(mine.url + '?action=topic')).json();
     if(r.ok && r.date === DAY.date && r.rank && LS.get(`topic:${mine.url}:${DAY.date}`, null) !== r.rank){
@@ -256,17 +261,21 @@ VIEWS.guide = ({r}) => {
 let gsCode = '';
 VIEWS.classSetup = async () => {
   show(`<h2>반 만들기</h2>
-    <p>학생 답은 <b>선생님의 구글 시트에만</b> 저장돼요. 오늘의 주제도 이 시트에 저장돼요. 처음 한 번만 하면 됩니다. (5분)</p>
+    <p>학생 답과 오늘의 주제는 <b>선생님의 구글 시트에만</b> 저장돼요. 처음 한 번만 하면 됩니다. (3분)</p>
     <div class="panel"><ol class="steps">
-      <li>구글 시트를 새로 만들어요. 이름 예: 오늘의 시사 답안 - 5·6학년</li>
-      <li>메뉴 <b>확장 프로그램 → Apps Script</b>를 열어요.</li>
-      <li>있던 내용을 모두 지우고 아래 코드를 붙여 넣고 저장해요.
-        <div class="row"><button class="btn ghost small-btn" id="copyGs" type="button">코드 복사</button><span class="muted" id="copyMsg"></span></div>
-        <pre class="gs" id="gs">코드를 불러오는 중…</pre></li>
-      <li><b>배포 → 새 배포 → 웹 앱</b>을 골라요. 실행: <b>나</b>, 액세스: <b>모든 사용자</b>로 하고 배포해요.
-        "확인되지 않은 앱"이 나오면 <b>고급 → 이동</b>을 눌러 허용해요. 내가 붙여 넣은 코드라 괜찮아요.</li>
-      <li>나온 <b>웹 앱 URL</b>을 아래에 붙여 넣어요.</li>
-    </ol></div>
+      <li><b>답안 시트 사본 만들기</b>
+        ${CFG.TEMPLATE_SHEET_COPY_URL ? `<div class="row"><a class="btn sun" href="${esc(CFG.TEMPLATE_SHEET_COPY_URL)}" target="_blank" rel="noopener">구글 시트 사본 만들기</a></div>
+        <span class="muted">새 창에서 <b>사본 만들기</b>를 누르면 내 드라이브에 시트가 생겨요. 이름은 '오늘의 시사 답안 - ○반'처럼 바꿔도 돼요.</span>` : '<span class="muted">아래 "코드 직접 붙여 넣기" 방법으로 해 주세요.</span>'}</li>
+      <li><b>웹 앱으로 배포하기</b><br>
+        만든 시트에서 <b>확장 프로그램 → Apps Script</b>를 열고, 오른쪽 위 <b>배포 → 새 배포</b> → 톱니바퀴 → <b>웹 앱</b>을 골라요.
+        실행: <b>나</b>, 액세스: <b>모든 사용자</b>로 하고 <b>배포</b>를 눌러요.<br>
+        <span class="muted">권한 창이 나오면 계정 선택 → <b>고급</b> → <b>(안전하지 않음)으로 이동</b> → <b>허용</b>. 선생님 시트 안의 코드라 괜찮아요.</span></li>
+      <li><b>웹 앱 URL 붙여 넣기</b><br>배포가 끝나면 나오는 <b>웹 앱 URL</b>을 복사해서 아래 칸에 붙여 넣어요.</li>
+    </ol>
+    <details><summary class="muted">사본 만들기가 안 되면: 코드 직접 붙여 넣기</summary>
+      <p class="muted">새 구글 시트 → 확장 프로그램 → Apps Script → 있던 내용을 지우고 아래 코드를 붙여 넣고 저장한 뒤, 위 2번부터 하세요.</p>
+      <div class="row"><button class="btn ghost small-btn" id="copyGs" type="button">코드 복사</button><span class="muted" id="copyMsg"></span></div>
+      <pre class="gs" id="gs">코드를 불러오는 중…</pre></details></div>
     <label class="field" for="sheetUrl">웹 앱 URL</label>
     <input type="url" id="sheetUrl" placeholder="https://script.google.com/macros/s/.../exec">
     <label class="field" for="className">반 이름</label>
@@ -282,7 +291,8 @@ VIEWS.classSetup = async () => {
     const url = sheetUrl.value.trim(), name = className.value.trim() || '우리 반';
     if(!SHEET_RE.test(url)){ setupMsg.textContent = '주소는 https://script.google.com/macros/s/ 로 시작하고 /exec 로 끝나야 해요.'; return; }
     setupMsg.textContent = '시트에 연결하는 중…';
-    try{ const r = await (await fetch(url + '?action=ping')).json(); if(!r.ok) throw 0; if(!r.topic) throw 'old'; }
+    let sheetLink = '';
+    try{ const r = await (await fetch(url + '?action=ping')).json(); if(!r.ok) throw 0; if(!r.topic) throw 'old'; sheetLink = r.sheetUrl || ''; }
     catch(e){ setupMsg.textContent = e === 'old'
       ? '시트 코드가 예전 버전이에요. 위 코드를 다시 붙여 넣고 [배포 → 배포 관리 → 새 버전]으로 다시 배포해 주세요.'
       : '시트에 연결되지 않았어요. 배포할 때 액세스를 "모든 사용자"로 했는지 확인해 주세요.'; return; }
@@ -290,7 +300,7 @@ VIEWS.classSetup = async () => {
     if(CFG.REGISTRY_URL){
       try{ const r = await (await fetch(`${CFG.REGISTRY_URL}?action=register&url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`)).json(); if(r.ok) code = r.code; }catch(e){}
     }
-    LS.set('myClass', {url, name, code});
+    LS.set('myClass', {url, name, code, sheetUrl: sheetLink});
     go('classReady', {}, true);
   };
 };
@@ -308,6 +318,7 @@ VIEWS.classReady = () => {
     <div class="row">
       <button class="btn" id="copyLink" type="button">링크 복사</button>
       <a class="btn ghost" href="${esc(link)}" target="_blank" rel="noopener">학생 화면 미리 보기</a>
+      ${mine.sheetUrl ? `<a class="btn ghost" href="${esc(mine.sheetUrl)}" target="_blank" rel="noopener">내 답안 시트 열기</a>` : ''}
     </div>
     <details class="panel"><summary>다른 시트로 바꾸기</summary>
       <p class="muted">이 기기에 저장된 반 정보를 지우고 새로 만들어요. 기존 시트의 답안은 그대로 남아 있어요.</p>

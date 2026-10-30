@@ -8,5 +8,7 @@ window.TODAY_NEWS_CONFIG = {
   REGISTRY_URL: "https://script.google.com/macros/s/AKfycbzZd-wBvWwYB-zVUaUQDtct4TqvjnkB2iPlzusf_hDI6HvZEP_GulG0ycsZj6lsgjteig/exec",
   SITE_TITLE: "오늘의 시사",
   GRADE: "5·6학년",
+  // 선생님들이 '반 만들기'에서 복사하는 답안 시트 원본 (코드가 들어 있는 시트, 링크가 있는 모든 사용자 보기)
+  TEMPLATE_SHEET_COPY_URL: "https://docs.google.com/spreadsheets/d/1YXdQWr1SFtehRYtI0EkrXRnaxdhOGhk8SSXRIrXUrTw/copy",
   TEACHER_PASS_SHA256: "b6408dfac4a551b5b184c06e86ae62ee5af7b9af39249edfa95f90dc23b96149"
 };

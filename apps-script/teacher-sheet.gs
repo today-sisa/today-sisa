@@ -1,8 +1,9 @@
 /**
  * 오늘의 시사 — 선생님 답안 시트 코드
  * ------------------------------------------------------------
- * 사용법 (5분)
- * 1. 구글 시트를 새로 하나 만듭니다. (이름 예: 오늘의 시사 답안 - 6학년 1반)
+ * 보통은 오늘의 시사 사이트의 '반 만들기 → 구글 시트 사본 만들기'로 이 코드가 든 시트를 복사합니다.
+ * 직접 만들 때 (5분)
+ * 1. 구글 시트를 새로 하나 만듭니다. (이름 예: 오늘의 시사 답안 - 5·6학년)
  * 2. 메뉴 [확장 프로그램] → [Apps Script]를 엽니다.
  * 3. 원래 있던 내용을 모두 지우고, 이 파일 전체를 붙여 넣고 저장(💾)합니다.
  * 4. 오른쪽 위 [배포] → [새 배포] → 톱니바퀴에서 [웹 앱] 선택
@@ -48,7 +49,8 @@ function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || 'ping';
   if (action === 'ping') {
     sheet_();
-    return out_({ ok: true, app: 'today-news', topic: true, sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    return out_({ ok: true, app: 'today-news', topic: true, sheet: ss.getName(), sheetUrl: ss.getUrl() });
   }
   if (action === 'topic') {
     const p = PropertiesService.getScriptProperties();
