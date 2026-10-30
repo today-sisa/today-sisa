@@ -133,7 +133,7 @@ VIEWS.teacherHome = () => {
          <div class="row"><button class="btn ghost small-btn" id="toSetup" type="button">반 만들기 (5분)</button></div>`}
     </div>
     <h2>오늘의 뉴스</h2>
-    <p class="muted">${mine ? '하나를 골라 <b>우리 반 주제로 정하기</b>를 누르면 QR·반코드 화면이 크게 떠요. 아이들 화면에도 그 뉴스가 떠요.' : '학습지 인쇄, 교사용 자료, TV 화면을 바로 쓸 수 있어요. <b>QR 크게 띄우기</b>로 아이들이 각자 풀게 할 수도 있어요 (답은 모이지 않아요).'}</p>
+    <p class="muted">${mine ? '하나를 골라 <b>우리 반 주제로 정하기</b>를 누르면 QR·반코드 화면이 크게 떠요. 아이들 화면에도 그 뉴스가 떠요.' : '학습지 인쇄, 교사용 자료, TV 화면을 바로 쓸 수 있어요. <b>QR 크게 띄우기</b>를 누르면 아이들이 QR로 영상을 각자 볼 수 있어요.'}</p>
     <ol class="rank-list">${DAY.items.map(it => `
       <li><span class="num">${it.rank}</span><div>
         <span class="tag ${it.type}">${TYPE_NAME[it.type]}</span><span class="tag cat">${esc(it.category)}</span>
@@ -211,11 +211,11 @@ async function sendFeedback(reason){
 }
 
 /* ───────── 주제 공유: 큰 QR + 반코드 ───────── */
-const soloLink = it => `${BASE}?date=${DAY.date}&r=${it.rank}&solo=1`;
+
 VIEWS.share = ({r}) => {
   if(!teacherOK()) return go('teacherGate', {}, true);
   const it = itemByRank(r), mine = LS.get('myClass', null);
-  const link = mine ? classLink(mine) : soloLink(it);
+  const link = mine ? classLink(mine) : reviewLink(it);   // 반이 없으면 영상 보기 화면으로
   show(`<div class="share">
       <p class="muted">${r}순위 · ${TYPE_NAME[it.type]}</p>
       <h2 class="share-title">${esc(it.title)}</h2>
@@ -225,20 +225,24 @@ VIEWS.share = ({r}) => {
           ${mine && mine.code ? `<p class="muted">반코드</p><div class="share-code">${esc(mine.code)}</div>` : ''}
           <p class="share-how">${mine
             ? (mine.code ? '학생 → 반코드 입력, 또는 QR 찍기' : 'QR을 찍어 들어와요')
-            : 'QR을 찍어 들어와요<br><span class="muted">반을 만들지 않아 답은 모이지 않아요</span>'}</p>
+            : 'QR을 찍으면 오늘 뉴스 영상이 열려요<br><span class="muted">학습지는 종이로 해요</span>'}</p>
         </div>
       </div>
       <h3>어떻게 할까요?</h3>
       <div class="choice two-col">
         <button class="big" id="shTV" type="button"><strong>교실 화면으로 함께 보기</strong><span>영상부터 TV에 띄우고 다 같이 이야기해요</span></button>
-        <button class="big" id="shSolo" type="button"><strong>아이들이 각자 보기</strong><span>이 화면을 띄워 두면 아이들이 QR${mine && mine.code ? '·반코드' : ''}로 들어와 각자 풀어요</span></button>
+        ${mine
+          ? `<button class="big" id="shSolo" type="button"><strong>아이들이 각자 보기</strong><span>이 화면을 띄워 두면 아이들이 QR${mine.code ? '·반코드' : ''}로 들어와 각자 풀어요</span></button>`
+          : `<button class="big" id="shSolo" type="button"><strong>아이들이 각자 영상 보기</strong><span>아이들이 QR로 영상을 보고, 학습지는 종이로 해요</span></button>`}
       </div>
+      ${mine ? '' : `<div class="row" style="justify-content:center"><button class="btn sun" id="shPrint" type="button">학습지 인쇄</button></div>`}
       <div class="row"><button class="btn ghost small-btn" id="shFull" type="button">전체 화면</button>
         ${mine ? '<button class="btn ghost small-btn" id="shRes" type="button">답 모아 보기</button>' : ''}
         <button class="btn ghost small-btn" id="shBack" type="button">뉴스 목록으로</button></div>
     </div>`, true);
   drawQR(document.getElementById('bigQR'), link, 360);
   shTV.onclick = () => { ITEM = it; tvMode = true; state = {}; STUDENT = {number:'', name:'우리 반'}; go('step', {i:0, r:it.rank, tv:1}); };
+  if(!mine){ shPrint.onclick = () => printSheet(it, false); }
   shSolo.onclick = () => { shSolo.querySelector('span').textContent = '아이들이 들어오는 동안 이 화면을 그대로 띄워 두세요.'; document.getElementById('bigQR').scrollIntoView({behavior:'smooth', block:'center'}); };
   shFull.onclick = () => { const el = document.documentElement; (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => {}); };
   shBack.onclick = () => go('teacherHome');
@@ -594,8 +598,9 @@ function streak(){
 VIEWS.review = ({r}) => {
   const it = itemByRank(r);
   show(`<p class="muted">${esc(DAY.date)} 오늘의 시사 다시 보기</p><h2>${esc(it.title)}</h2>
-    ${it.video ? `<div class="video"><div id="yt"></div><div class="cover" id="vCover" hidden><div><p style="font-size:22px">영상 끝</p></div></div></div>` : ''}
-    <div class="panel"><h3>쉬운 요약</h3><p>${(it.summary||[]).map(esc).join(' ')}</p></div>
+    ${it.video ? `<div class="video"><div id="yt"></div><div class="cover" id="vCover" hidden><div><p style="font-size:22px">영상 끝</p></div></div></div>
+      <p class="muted">${esc(it.video.channel)} 공식 채널 영상 · 영상이 안 나오면 아래 기사 원문을 보세요.</p>`
+      : `<div class="panel"><p>오늘은 이 뉴스에 맞는 영상이 없어요. 아래 기사 원문을 보세요.</p></div>`}
     <a class="btn ghost big-link" href="${esc(it.link)}" target="_blank" rel="noopener">기사 원문 열기 (${esc(it.source)})</a>${footer()}`);
   if(it.video) mountYT(it.video.id, null);
 };
@@ -836,7 +841,7 @@ function mountYT(id, onDone){
   window.onYouTubeIframeAPIReady = start;
   if(!document.getElementById('ytapi')){
     const s = document.createElement('script'); s.id = 'ytapi'; s.src = 'https://www.youtube.com/iframe_api';
-    s.onerror = () => { const v = document.querySelector('.video'); if(v) v.outerHTML = `<div class="panel"><p>이 기기에서는 영상이 열리지 않아요. 아래 원문이나 요약을 봐 주세요.</p></div>`; };
+    s.onerror = () => { const v = document.querySelector('.video'); if(v) v.outerHTML = `<div class="panel"><p>이 기기에서는 영상이 열리지 않아요. 아래 기사 원문을 봐 주세요.</p></div>`; };
     document.head.appendChild(s);
   }
 }
