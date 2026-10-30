@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
-<script src="config.js?v=20261030d"></script>
-<script src="lib/qrcode.min.js?v=20261030d" defer></script>
+<script src="config.js?v=20261030e"></script>
+<script src="lib/qrcode.min.js?v=20261030e" defer></script>
 <style>
 :root{
   --ink:#1F2A44; --ink-soft:#4B5672; --line:#D5DEEA; --paper:#FBFCFE; --sky:#E3EEFA; --sky-deep:#BFD6F0;
@@ -171,6 +171,19 @@ ol.steps{padding-left:22px}ol.steps li{margin:6px 0}
 .small-btn{padding:8px 14px;font-size:15px}
 .wrap.wide{max-width:1100px}
 .guide{display:grid;gap:12px;margin:10px 0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:var(--sky);border-radius:999px;padding:3px 12px;font-size:15px}
+.bar-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(80px,1fr) 92px;gap:10px;align-items:center;margin:8px 0}
+.bar-label{font-size:16px}.bar-track{height:18px;background:#EEF2F7;border-radius:9px;overflow:hidden}
+.bar-fill{height:100%;background:var(--sky-deep);border-radius:9px}.bar-fill.a{background:var(--a)}.bar-fill.b{background:var(--b)}
+.bar-fill.ok{background:var(--fact)}.bar-fill.warn{background:var(--warn)}
+.bar-num{font-size:15px;color:var(--ink-soft);text-align:right}
+.w6-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.w6-col .ans{font-size:14px;background:var(--fact-soft);border-radius:8px;padding:3px 8px;margin:4px 0}
+.w6-col .mini{font-size:15px;border-bottom:1px dashed var(--line);padding:3px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card-ans{background:var(--paper);border:2px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;font-size:17px}
+.card-ans small{display:block;font-size:13px;color:var(--ink-soft)}.card-ans.sa{border-color:var(--a)}.card-ans.sb{border-color:var(--b)}
+.card-ans .muted{margin-top:6px;font-size:13px}
+@media (max-width:520px){.bar-row{grid-template-columns:1fr 70px}.bar-track{grid-column:1/-1;order:3}.w6-grid{grid-template-columns:1fr 1fr}}
 .g-step{margin:0;background:var(--paper);border:2px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
 .g-step figcaption{font-size:16px;margin-bottom:8px;display:flex;gap:8px;align-items:flex-start}
 .g-num{flex:none;color:var(--a);font-size:17px;min-width:22px}
@@ -205,6 +218,6 @@ ol.steps{padding-left:22px}ol.steps li{margin:6px 0}
 <main id="app" class="wrap" aria-live="polite"><p class="muted" style="margin-top:30px">오늘의 뉴스를 불러오는 중이에요.</p></main>
 <section id="print" aria-hidden="true"></section>
 <div id="qrTmp" hidden></div>
-<script src="app.js?v=20261030d"></script>
+<script src="app.js?v=20261030e"></script>
 </body>
 </html>

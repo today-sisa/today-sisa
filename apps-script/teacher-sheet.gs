@@ -15,12 +15,14 @@
  *    오늘의 시사 사이트의 '학생과 함께 할래요' 화면에 붙여 넣습니다.
  *
  * 학생 답과 '오늘의 주제'는 이 시트에만 저장됩니다. 다른 곳에는 모이지 않습니다.
+ * '답 모아 보기'는 선생님 열쇠('설정' 탭)를 아는 기기에서만 답을 읽을 수 있습니다.
  * 코드를 고친 뒤에는 [배포] → [배포 관리] → 연필 → 버전 '새 버전'으로 다시 배포하세요.
  */
 
 const SHEET_NAME = '답안';
 const HEADERS = ['제출 시각', '뉴스 날짜', '뉴스 제목', '번호', '이름', '낱말 (맞힌 수)', '사실·의견 (맞힌 수)',
-  '질문1', '답1', '질문2', '답2', '질문3', '답3', '질문4', '답4', '질문5', '답5'];
+  '질문1', '답1', '질문2', '답2', '질문3', '답3', '질문4', '답4', '질문5', '답5', '상세(자동)'];
+const CODE_VERSION = 2;
 const MAX_LEN = 1500;
 
 function sheet_() {
@@ -44,13 +46,57 @@ function clip_(v) {
   return String(v == null ? '' : v).slice(0, MAX_LEN);
 }
 
+function props_() { return PropertiesService.getScriptProperties(); }
+
+/** '설정' 탭에 선생님 열쇠를 적어 둠 (다른 컴퓨터에서 답 모아 보기 할 때 필요) */
+function writeKeyTab_(key) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName('설정');
+  if (!sh) sh = ss.insertSheet('설정');
+  sh.getRange('A1:B1').setValues([['선생님 열쇠', key]]);
+  sh.getRange('A2').setValue('다른 컴퓨터에서 "답 모아 보기"를 할 때 B1 칸의 열쇠를 붙여 넣으세요. 학생에게 알려 주지 마세요.');
+  sh.getRange('A1').setFontWeight('bold');
+}
+
+function cellDate_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  return String(v).replace(/^'/, '').slice(0, 10);
+}
+
+/** 선생님 열쇠로 그날 답 읽기 */
+function answers_(date) {
+  const sh = sheet_();
+  const last = sh.getLastRow();
+  if (last < 2) return [];
+  const rows = sh.getRange(2, 1, last - 1, HEADERS.length).getValues();
+  const out = [];
+  rows.forEach(r => {
+    if (cellDate_(r[1]) !== date) return;
+    const qa = [];
+    for (let i = 0; i < 5; i++) { if (r[7 + i * 2]) qa.push({ q: String(r[7 + i * 2]), a: String(r[8 + i * 2]) }); }
+    let detail = null;
+    try { detail = r[17] ? JSON.parse(r[17]) : null; } catch (err) { detail = null; }
+    out.push({ at: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), title: String(r[2]),
+      number: String(r[3]), name: String(r[4]), words: String(r[5]), fo: String(r[6]), answers: qa, detail: detail });
+  });
+  return out;
+}
+
 /** 연결 확인 · 오늘의 주제 읽기 */
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || 'ping';
   if (action === 'ping') {
     sheet_();
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    return out_({ ok: true, app: 'today-news', topic: true, sheet: ss.getName(), sheetUrl: ss.getUrl() });
+    return out_({ ok: true, app: 'today-news', topic: true, version: CODE_VERSION, hasKey: !!props_().getProperty('teacherKey'),
+      sheet: ss.getName(), sheetUrl: ss.getUrl() });
+  }
+  if (action === 'answers') {
+    const key = props_().getProperty('teacherKey');
+    if (!key || e.parameter.key !== key) return out_({ ok: false, error: 'key' });
+    const date = String(e.parameter.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return out_({ ok: false, error: 'date' });
+    return out_({ ok: true, rows: answers_(date) });
   }
   if (action === 'topic') {
     const p = PropertiesService.getScriptProperties();
@@ -71,18 +117,29 @@ function doPost(e) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(d.date)) || !(rank >= 1 && rank <= 5)) {
         return out_({ ok: false, error: 'bad topic' });
       }
-      PropertiesService.getScriptProperties().setProperties({ topicDate: String(d.date), topicRank: String(rank) });
+      props_().setProperties({ topicDate: String(d.date), topicRank: String(rank) });
       return out_({ ok: true, date: d.date, rank: rank });
     }
+    if (d.action === 'initKey') {  // 반을 처음 만들 때 한 번만: 선생님 열쇠 정하기
+      if (props_().getProperty('teacherKey')) return out_({ ok: false, error: 'exists' });
+      const key = String(d.key || '');
+      if (!/^[A-Za-z0-9]{16,64}$/.test(key)) return out_({ ok: false, error: 'bad key' });
+      props_().setProperty('teacherKey', key);
+      writeKeyTab_(key);
+      return out_({ ok: true });
+    }
     const row = [
-      new Date(), clip_(d.date), clip_(d.title), clip_(d.number), clip_(d.name),
+      new Date(), "'" + clip_(d.date), clip_(d.title), clip_(d.number), clip_(d.name),
       clip_(d.words_score), clip_(d.fo_score)
     ];
     const qa = Array.isArray(d.answers) ? d.answers.slice(0, 5) : [];
     for (let i = 0; i < 5; i++) {
       row.push(clip_(qa[i] ? qa[i].q : ''), clip_(qa[i] ? qa[i].a : ''));
     }
-    sheet_().appendRow(row);
+    row.push(d.detail ? clip_(JSON.stringify(d.detail)) : '');
+    const sh = sheet_();
+    if (sh.getLastColumn() < HEADERS.length) sh.getRange(1, HEADERS.length).setValue(HEADERS[HEADERS.length - 1]);
+    sh.appendRow(row);
     return out_({ ok: true });
   } catch (err) {
     return out_({ ok: false, error: String(err) });

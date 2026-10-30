@@ -126,7 +126,8 @@ VIEWS.teacherHome = () => {
     <div class="panel">${mine
       ? `<b>우리 반: ${esc(mine.name)}</b>${mine.code ? ` · 반코드 <b>${esc(mine.code)}</b>` : ''}
          <p class="muted" id="topicNow">오늘 주제: ${topicRank ? `${topicRank}순위` : '아직 고르지 않음 (고르지 않으면 1순위로 진행)'}</p>
-         <div class="row"><button class="btn ghost small-btn" id="toQR" type="button">QR·반 링크 보기</button>
+         <div class="row"><button class="btn sun small-btn" id="toRes" type="button">답 모아 보기</button>
+           <button class="btn ghost small-btn" id="toQR" type="button">QR·반 링크 보기</button>
            ${mine.sheetUrl ? `<a class="btn ghost small-btn" href="${esc(mine.sheetUrl)}" target="_blank" rel="noopener">내 답안 시트 열기</a>` : ''}</div>`
       : `<b>학생과 함께 하려면</b><p class="muted">내 구글 시트를 연결해 반을 만들면, 아이들은 QR·반코드로 들어오고 답이 시트로 모여요. 인쇄만 하실 거면 안 하셔도 돼요.</p>
          <div class="row"><button class="btn ghost small-btn" id="toSetup" type="button">반 만들기 (5분)</button></div>`}
@@ -156,7 +157,7 @@ VIEWS.teacherHome = () => {
       <div class="row">${['너무 어려움','부적절함','지루함','기타'].map(r => `<button class="btn ghost small-btn" data-reason="${r}" type="button">${r}</button>`).join('')}</div>
       <input type="text" id="fbMemo" placeholder="한 줄 메모 (선택)"><p class="muted" id="fbMsg"></p>
     </details>${footer()}`);
-  if(mine){ toQR.onclick = () => go('classReady'); refreshTopic(mine); }
+  if(mine){ toQR.onclick = () => go('classReady'); toRes.onclick = () => go('results', {r: topicRank || 1}); refreshTopic(mine); }
   else toSetup.onclick = () => go('classSetup');
   document.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => setTopic(mine, Number(b.dataset.topic), b));
   document.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { ITEM = itemByRank(b.dataset.tv); tvMode = true; state = {}; STUDENT = {number:'', name:'우리 반'}; go('step', {i:0, r:ITEM.rank, tv:1}); });
@@ -223,6 +224,7 @@ VIEWS.share = ({r}) => {
         <button class="big" id="shSolo" type="button"><strong>아이들이 각자 보기</strong><span>이 화면을 띄워 두면 아이들이 QR${mine && mine.code ? '·반코드' : ''}로 들어와 각자 풀어요</span></button>
       </div>
       <div class="row"><button class="btn ghost small-btn" id="shFull" type="button">전체 화면</button>
+        ${mine ? '<button class="btn ghost small-btn" id="shRes" type="button">답 모아 보기</button>' : ''}
         <button class="btn ghost small-btn" id="shBack" type="button">뉴스 목록으로</button></div>
     </div>`, true);
   drawQR(document.getElementById('bigQR'), link, 360);
@@ -230,7 +232,138 @@ VIEWS.share = ({r}) => {
   shSolo.onclick = () => { shSolo.querySelector('span').textContent = '아이들이 들어오는 동안 이 화면을 그대로 띄워 두세요.'; document.getElementById('bigQR').scrollIntoView({behavior:'smooth', block:'center'}); };
   shFull.onclick = () => { const el = document.documentElement; (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => {}); };
   shBack.onclick = () => go('teacherHome');
+  if(mine) shRes.onclick = () => go('results', {r});
 };
+
+/* ───────── 답 모아 보기 ───────── */
+function randKey(){
+  const a = new Uint8Array(18); crypto.getRandomValues(a);
+  return [...a].map(b => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'[b % 56]).join('');
+}
+async function initKey(url){
+  const key = randKey();
+  const body = JSON.stringify({app:'today-news', action:'initKey', key});
+  try{ const j = await (await fetch(url, {method:'POST', body})).json(); return j.ok ? key : ''; }
+  catch(e){ try{ await fetch(url, {method:'POST', body, mode:'no-cors'}); return key; }catch(e2){ return ''; } }
+}
+let resTimer = null;
+const pct = (n, d) => d ? Math.round(n / d * 100) : 0;
+const bar = (label, n, total, cls = '') => `<div class="bar-row"><div class="bar-label">${label}</div>
+  <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct(n,total)}%"></div></div><div class="bar-num">${n}명${total ? ` · ${pct(n,total)}%` : ''}</div></div>`;
+
+VIEWS.results = async ({r}) => {
+  if(!teacherOK()) return go('teacherGate', {}, true);
+  clearInterval(resTimer);
+  const mine = LS.get('myClass', null);
+  if(!mine) return go('classSetup', {}, true);
+  const it = itemByRank(r);
+  const hideNames = LS.get('hideNames', false);
+  show(`<div class="tabs" role="tablist">${DAY.items.filter(full).map(x => `<button role="tab" aria-selected="${x.rank===it.rank}" data-rr="${x.rank}" type="button">${x.rank}순위</button>`).join('')}</div>
+    <h2>${esc(it.title)}</h2>
+    <div class="row"><label class="muted"><input type="checkbox" id="hideN" ${hideNames?'checked':''}> 이름 가리기 (TV에 띄울 때)</label>
+      <label class="muted"><input type="checkbox" id="autoR" checked> 15초마다 새로고침</label>
+      <button class="btn ghost small-btn" id="reload" type="button">지금 새로고침</button></div>
+    <div id="resBody"><p class="muted">답을 불러오는 중이에요.</p></div>`, true);
+  document.querySelectorAll('[data-rr]').forEach(b => b.onclick = () => go('results', {r:Number(b.dataset.rr)}, true));
+  hideN.onchange = () => { LS.set('hideNames', hideN.checked); load(); };
+  reload.onclick = () => load();
+  const myView = history.state;
+  const tick = () => { if(history.state !== myView || !document.getElementById('resBody')){ clearInterval(resTimer); return; } if(autoR.checked) load(); };
+  resTimer = setInterval(tick, 15000);
+
+  async function load(){
+    const m = LS.get('myClass', mine);
+    const body = document.getElementById('resBody'); if(!body) return;
+    let res = null;
+    try{ res = await (await fetch(`${m.url}?action=answers&date=${DAY.date}&key=${encodeURIComponent(m.key || '')}`)).json(); }
+    catch(e){ body.innerHTML = '<p class="muted">시트에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.</p>'; return; }
+    if(!res.ok){ return keyHelp(body, m); }
+    renderResults(body, it, (res.rows||[]).filter(x => (x.detail && x.detail.rank === it.rank) || String(x.title).startsWith(`[${it.rank}순위]`)), document.getElementById('hideN').checked);
+  }
+  load();
+};
+
+async function keyHelp(body, m){
+  let ping = {};
+  try{ ping = await (await fetch(m.url + '?action=ping')).json(); }catch(e){}
+  if(!(ping.version >= 2)){
+    body.innerHTML = `<div class="panel"><b>시트 코드를 새로 바꿔 주세요</b>
+      <p>답 모아 보기는 새 시트 코드에서 쓸 수 있어요. 답안 시트의 Apps Script에 아래 주소의 코드를 붙여 넣고,
+      <b>배포 → 배포 관리 → 연필 → 버전: 새 버전 → 배포</b>를 눌러 주세요. (웹 앱 주소는 그대로예요)</p>
+      <p><a href="https://raw.githubusercontent.com/today-sisa/today-sisa.github.io/main/apps-script/teacher-sheet.gs" target="_blank" rel="noopener">새 시트 코드 열기</a></p></div>`;
+    return;
+  }
+  if(!ping.hasKey){
+    body.innerHTML = `<div class="panel"><b>선생님 열쇠 만들기</b><p>이 기기에서 답을 볼 수 있게 열쇠를 만들어요. 열쇠는 답안 시트의 '설정' 탭에도 적혀요.</p>
+      <button class="btn sun" id="mkKey" type="button">열쇠 만들고 답 보기</button><p class="muted" id="mkMsg"></p></div>`;
+    mkKey.onclick = async () => {
+      mkKey.disabled = true;
+      const key = await initKey(m.url);
+      if(!key){ mkMsg.textContent = '만들지 못했어요. 다시 눌러 주세요.'; mkKey.disabled = false; return; }
+      LS.set('myClass', {...m, key}); VIEWS.results(history.state.params);
+    };
+    return;
+  }
+  body.innerHTML = `<div class="panel"><b>선생님 열쇠를 넣어 주세요</b>
+    <p>다른 기기에서 만든 반이에요. 답안 시트의 <b>'설정' 탭 B1 칸</b>에 있는 열쇠를 복사해 붙여 넣으면 이 기기에서도 답을 볼 수 있어요.</p>
+    <input type="text" id="keyIn" autocomplete="off" placeholder="열쇠 붙여 넣기">
+    <div class="row"><button class="btn" id="keyGo" type="button">확인</button><span class="muted" id="keyMsg"></span></div></div>`;
+  keyGo.onclick = () => { const k = keyIn.value.trim(); if(!k){ keyMsg.textContent = '열쇠를 붙여 넣어 주세요.'; return; }
+    LS.set('myClass', {...m, key:k}); VIEWS.results(history.state.params); };
+}
+
+function renderResults(body, it, rows, hide){
+  // 같은 학생이 여러 번 내면 마지막 것만
+  const byStu = new Map();
+  rows.forEach(x => byStu.set(`${x.number}|${x.name}`, x));
+  const list = [...byStu.values()].sort((a,b) => Number(a.number) - Number(b.number));
+  const n = list.length;
+  const who = (x, i) => hide ? `학생 ${i+1}` : `${esc(x.number)}번 ${esc(x.name)}`;
+  if(!n){ body.innerHTML = `<div class="panel"><p>아직 낸 학생이 없어요. 아이들이 보내면 여기에 나타나요.</p></div>`; return; }
+  const a = it.activity || {}, D = list.map(x => x.detail || {});
+  let h = `<div class="panel"><h3>낸 학생 ${n}명</h3><div class="chips">${list.map((x,i) => `<span class="chip">${who(x,i)}</span>`).join('')}</div></div>`;
+
+  if(it.type === 'debate'){
+    const sideOf = (x, d) => d.side || (/^\[(.+?)\]/.exec((x.answers.find(q => q.q === a.choose_question) || {}).a || '') || [])[1];
+    const tA = a.side_a.title, tB = a.side_b.title;
+    let ca = 0, cb = 0;
+    list.forEach((x,i) => { const s = sideOf(x, D[i]); if(s === 'a' || s === tA) ca++; else if(s === 'b' || s === tB) cb++; });
+    h += `<div class="panel"><h3>${esc(a.issue)}</h3>${bar(esc(tA), ca, n, 'a')}${bar(esc(tB), cb, n, 'b')}${n-ca-cb ? `<p class="muted">고르지 않은 학생 ${n-ca-cb}명</p>` : ''}</div>`;
+  }
+  if(it.type === 'media'){
+    const cnt = {}; D.forEach(d => { if(d.feeling) cnt[d.feeling] = (cnt[d.feeling]||0) + 1; });
+    h += `<div class="panel"><h3>제목들이 주는 느낌</h3>${(a.feeling_choices||[]).map(c => bar(esc(c), cnt[c]||0, n)).join('')}</div>`;
+  }
+  const withD = D.filter(d => Array.isArray(d.fo));
+  if(withD.length){
+    const fo = it.facts_opinions || [];
+    const rates = fo.map((f,k) => withD.filter(d => d.fo[k]).length);
+    const worst = rates.indexOf(Math.min(...rates));
+    h += `<div class="panel"><h3>사실일까 의견일까 · 맞힌 학생</h3>${fo.map((f,k) =>
+      bar(`${k===worst && rates[k] < withD.length ? '⚠️ ' : ''}${esc(f.sentence)} <span class="muted">(${esc(f.answer)})</span>`, rates[k], withD.length, k===worst && rates[k] < withD.length ? 'warn' : 'ok')).join('')}
+      ${rates[worst] < withD.length ? `<p class="muted">⚠️ 가장 많이 헷갈린 문장이에요. 함께 이야기해 보세요.</p>` : ''}</div>`;
+    const words = it.words || [];
+    h += `<div class="panel"><h3>오늘의 낱말 · 맞힌 학생</h3>${words.map((w,k) => bar(`${esc(w.word)} <span class="muted">(${esc(w.meaning)})</span>`, withD.filter(d => d.words && d.words[k]).length, withD.length, 'ok')).join('')}</div>`;
+  }
+  const W6k = Object.keys(W6);
+  if(D.some(d => d.w5 && Object.keys(d.w5).length)){
+    h += `<div class="panel"><h3>육하원칙</h3><div class="w6-grid">${W6k.map(k => `<div class="w6-col"><b>${W6[k]}</b>
+      <div class="ans">기사: ${esc((it.five_w||{})[k])}</div>
+      ${list.map((x,i) => D[i].w5 && D[i].w5[k] ? `<div class="mini">${esc(D[i].w5[k])}${hide ? '' : ` <span class="muted">- ${esc(x.name)}</span>`}</div>` : '').join('')}</div>`).join('')}</div></div>`;
+  }
+  const QS = [['impact_question'],['wonder_question'],['choose_question'],['other_side_question'],['why_question'],['rewrite_question'],['challenge']]
+    .map(([k]) => [k, k === 'challenge' ? it.challenge : a[k]]).filter(([k,q]) => q);
+  QS.forEach(([k,q]) => {
+    const items = list.map((x,i) => {
+      let v = (D[i].writes || {})[k];
+      if(!v){ const f = x.answers.find(y => y.q === q || y.q === '[도전] ' + q); v = f ? f.a.replace(/^\[.*?\]\s*/, '') : ''; }
+      const side = k === 'choose_question' && it.type === 'debate' ? (D[i].side === 'a' ? a.side_a.title : D[i].side === 'b' ? a.side_b.title : '') : '';
+      return v ? `<div class="card-ans ${side ? (D[i].side === 'a' ? 'sa' : 'sb') : ''}">${side ? `<small>${esc(side)}</small>` : ''}${esc(v)}<div class="muted">${who(x,i)}</div></div>` : '';
+    }).filter(Boolean);
+    if(items.length) h += `<div class="panel"><h3>✏️ ${esc(q)}</h3><div class="cards">${items.join('')}</div></div>`;
+  });
+  body.innerHTML = h;
+}
 
 /* ───────── 교사용 자료 ───────── */
 function questionLabel(it, k){
@@ -303,8 +436,8 @@ VIEWS.classSetup = async () => {
     const url = sheetUrl.value.trim(), name = className.value.trim() || '우리 반';
     if(!SHEET_RE.test(url)){ setupMsg.textContent = '주소는 https://script.google.com/macros/s/ 로 시작하고 /exec 로 끝나야 해요.'; return; }
     setupMsg.textContent = '시트에 연결하는 중…';
-    let sheetLink = '';
-    try{ const r = await (await fetch(url + '?action=ping')).json(); if(!r.ok) throw 0; if(!r.topic) throw 'old'; sheetLink = r.sheetUrl || ''; }
+    let sheetLink = '', ping = null;
+    try{ ping = await (await fetch(url + '?action=ping')).json(); if(!ping.ok) throw 0; if(!ping.topic) throw 'old'; sheetLink = ping.sheetUrl || ''; }
     catch(e){ setupMsg.textContent = e === 'old'
       ? '시트 코드가 예전 버전이에요. 위 코드를 다시 붙여 넣고 [배포 → 배포 관리 → 새 버전]으로 다시 배포해 주세요.'
       : '시트에 연결되지 않았어요. 배포할 때 액세스를 "모든 사용자"로 했는지 확인해 주세요.'; return; }
@@ -312,7 +445,8 @@ VIEWS.classSetup = async () => {
     if(CFG.REGISTRY_URL){
       try{ const r = await (await fetch(`${CFG.REGISTRY_URL}?action=register&url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`)).json(); if(r.ok) code = r.code; }catch(e){}
     }
-    LS.set('myClass', {url, name, code, sheetUrl: sheetLink});
+    const key = (ping.version >= 2 && !ping.hasKey) ? await initKey(url) : '';
+    LS.set('myClass', {url, name, code, sheetUrl: sheetLink, key});
     go('classReady', {}, true);
   };
 };
@@ -631,8 +765,14 @@ function finishStep(bar, toStep){
 }
 async function submit(ans, s){
   send.disabled = true; sendMsg.textContent = '보내는 중…';
-  const payload = JSON.stringify({app:'today-news', date:DAY.date, title:`[${ITEM.rank}순위] ${ITEM.title}`, number:STUDENT.number, name:STUDENT.name,
-    words_score:`${s.w}/${s.wn}`, fo_score:`${s.f}/${s.fn}`, answers:ans});
+  const it = ITEM, OX = b => b ? '○' : '×';
+  const wOK = (it.words||[]).map((x,k) => !!(state.words && state.words[k] === x.meaning));
+  const fOK = (it.facts_opinions||[]).map((x,k) => !!(state.fo && state.fo[k] === x.answer));
+  const detail = {v:1, rank:it.rank, words:wOK, fo:fOK, side:state.side || '', feeling:state.feeling || '', w5:state.w5 || {},
+    writes:Object.fromEntries(['impact_question','wonder_question','choose_question','other_side_question','why_question','rewrite_question','challenge']
+      .filter(k => state[k]).map(k => [k, String(state[k]).slice(0, 500)]))};
+  const payload = JSON.stringify({app:'today-news', date:DAY.date, title:`[${it.rank}순위] ${it.title}`, number:STUDENT.number, name:STUDENT.name,
+    words_score:`${s.w}/${s.wn} ${wOK.map(OX).join('')}`, fo_score:`${s.f}/${s.fn} ${fOK.map(OX).join('')}`, answers:ans, detail});
   let ok = false;
   try{ const j = await (await fetch(CLASS.url, {method:'POST', body:payload})).json(); ok = !!j.ok; }
   catch(e){ try{ await fetch(CLASS.url, {method:'POST', body:payload, mode:'no-cors'}); ok = true; }catch(e2){} }
