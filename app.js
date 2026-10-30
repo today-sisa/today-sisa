@@ -279,7 +279,7 @@ VIEWS.classSetup = async () => {
         <span class="muted">새 창에서 <b>사본 만들기</b>를 누르면 내 드라이브에 시트가 생겨요. 이름은 '오늘의 시사 답안 - ○반'처럼 바꿔도 돼요.</span>` : '<span class="muted">아래 "코드 직접 붙여 넣기" 방법으로 해 주세요.</span>'}</li>
       <li><b>웹 앱으로 배포하기</b> <span class="muted">(그림을 따라 하세요)</span>
         <div class="guide">${GUIDE.map((g, k) => `
-          <figure class="g-step"><figcaption><span class="g-num">${k+1}</span><span>${g.t}</span></figcaption>
+          <figure class="g-step"><figcaption><b class="g-num">${k+1}]</b><span>${g.t}</span></figcaption>
             <img src="img/setup/${g.img}.png" alt="${esc(g.alt)}" loading="lazy"></figure>`).join('')}
         </div></li>
       <li><b>웹 앱 URL 붙여 넣기</b><br>배포가 끝나면 나오는 <b>웹 앱 URL</b>을 복사해서 아래 칸에 붙여 넣어요.</li>
