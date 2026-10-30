@@ -1,0 +1,84 @@
+{
+ "feeds": [
+  {
+   "source": "연합뉴스",
+   "via": "direct",
+   "count": 120,
+   "raw_entries": 120
+  },
+  {
+   "source": "연합뉴스TV",
+   "via": "direct",
+   "count": 5,
+   "raw_entries": 5
+  },
+  {
+   "source": "SBS",
+   "via": "direct",
+   "count": 15,
+   "raw_entries": 15
+  },
+  {
+   "source": "JTBC",
+   "via": "direct",
+   "count": 10,
+   "raw_entries": 10
+  },
+  {
+   "source": "MBC",
+   "via": "direct",
+   "count": 0,
+   "raw_entries": 0
+  },
+  {
+   "source": "YTN",
+   "via": "google",
+   "count": 88,
+   "raw_entries": 100
+  },
+  {
+   "source": "KBS",
+   "via": "google",
+   "count": 88,
+   "raw_entries": 100
+  },
+  {
+   "source": "MBC",
+   "via": "google",
+   "count": 92,
+   "raw_entries": 100
+  },
+  {
+   "source": "SBS",
+   "via": "google",
+   "count": 87,
+   "raw_entries": 100
+  },
+  {
+   "source": "JTBC",
+   "via": "google",
+   "count": 88,
+   "raw_entries": 100
+  },
+  {
+   "source": "연합뉴스TV",
+   "via": "google",
+   "count": 95,
+   "raw_entries": 100
+  }
+ ],
+ "notes": [
+  "오류: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)"
+ ],
+ "candidates_by_source": {
+  "연합뉴스": 13,
+  "연합뉴스TV": 13,
+  "SBS": 13,
+  "JTBC": 13,
+  "YTN": 13,
+  "KBS": 13,
+  "MBC": 12
+ },
+ "status": "실패",
+ "finished_at": "2026-10-30T10:15+09:00"
+}
