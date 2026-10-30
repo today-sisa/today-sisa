@@ -5,7 +5,7 @@
 //   비밀번호를 바꾸려면 Claude에게 "교사 비밀번호를 ○○로 바꿔줘"라고 하거나,
 //   https://emn178.github.io/online-tools/sha256.html 에 새 비밀번호를 넣고 나온 값을 아래에 붙여 넣으세요.
 window.TODAY_NEWS_CONFIG = {
-  REGISTRY_URL: "",
+  REGISTRY_URL: "https://script.google.com/macros/s/AKfycbzZd-wBvWwYB-zVUaUQDtct4TqvjnkB2iPlzusf_hDI6HvZEP_GulG0ycsZj6lsgjteig/exec",
   SITE_TITLE: "오늘의 시사",
   GRADE: "5·6학년",
   TEACHER_PASS_SHA256: "b6408dfac4a551b5b184c06e86ae62ee5af7b9af39249edfa95f90dc23b96149"

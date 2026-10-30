@@ -157,6 +157,9 @@ def apply_banned(cfg: dict, items: list[dict]) -> list[dict]:
 
 # ─────────────────────────── Gemini ───────────────────────────
 
+_dead_models: set = set()
+
+
 def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> dict:
     if MOCK:
         return json.loads((FIXTURES / mock_name).read_text(encoding="utf-8"))
@@ -168,8 +171,10 @@ def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> 
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": temperature, "responseMimeType": "application/json"},
     }
-    last = None
+    last, errors = None, []
     for model in cfg["gemini_models"]:
+        if model in _dead_models:
+            continue
         for attempt in range(3):
             try:
                 r = requests.post(
@@ -177,12 +182,17 @@ def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> 
                     headers={"x-goog-api-key": key, "Content-Type": "application/json"},
                     json=body, timeout=300,
                 )
+                if r.status_code == 429 and ("PerDay" in r.text or "per day" in r.text.lower()):
+                    last = f"{model} 오늘 무료 한도 다 씀"
+                    _dead_models.add(model)  # 오늘은 이 모델 건너뜀
+                    break
                 if r.status_code in (429, 500, 502, 503):
                     last = f"{model} {r.status_code}"
-                    time.sleep(10 * (attempt + 1))
+                    time.sleep(15 * (attempt + 1))
                     continue
-                if r.status_code == 404:
-                    last = f"{model} 모델 없음"
+                if r.status_code in (400, 403, 404):
+                    last = f"{model} 사용 불가({r.status_code})"
+                    _dead_models.add(model)
                     break
                 r.raise_for_status()
                 text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
@@ -197,7 +207,10 @@ def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> 
                 last = f"{model} 연결 문제 {str(e)[:80]}"
                 log(f"Gemini 연결 문제, 다시 시도 ({attempt + 1}/3): {model}")
                 time.sleep(10)
-    raise RuntimeError(f"Gemini 호출 실패: {last}")
+        if last and (not errors or errors[-1] != last):
+            errors.append(last)
+    RUN.setdefault("gemini_errors", []).extend(e for e in errors if e not in RUN.get("gemini_errors", []))
+    raise RuntimeError(f"Gemini 호출 실패: {' / '.join(errors) or last}")
 
 
 # ─────────────────────────── 2. 선정 ───────────────────────────

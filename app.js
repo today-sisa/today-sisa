@@ -21,6 +21,7 @@ let CLASS = null;      // 학생: {url, name, code}
 let STUDENT = null;    // {number, name}
 let state = {};        // 학생 답
 let tvMode = false;
+let soloMode = false;   // 반 없이 QR로 들어와 혼자 풀기 (답 제출 없음)
 
 /* ───────── 데이터 ───────── */
 async function getJSON(path){
@@ -55,8 +56,8 @@ function render(st){
 }
 window.addEventListener('popstate', e => { if(e.state) render(e.state); });
 document.getElementById('backBtn').onclick = () => history.back();
-document.getElementById('homeBtn').onclick = () => go(CLASS && STUDENT ? 'studentHome' : 'home');
-function show(html){ $app.innerHTML = html; }
+document.getElementById('homeBtn').onclick = () => go(soloMode && ITEM ? 'soloHome' : CLASS && STUDENT ? 'studentHome' : 'home', soloMode && ITEM ? {r:ITEM.rank} : {});
+function show(html, wide){ $app.innerHTML = html; $app.classList.toggle('wide', !!wide); }
 
 function setStamp(dateStr){
   const [y,m,d] = dateStr.split('-').map(Number);
@@ -130,7 +131,7 @@ VIEWS.teacherHome = () => {
          <div class="row"><button class="btn ghost small-btn" id="toSetup" type="button">반 만들기 (5분)</button></div>`}
     </div>
     <h2>오늘의 뉴스</h2>
-    <p class="muted">${mine ? '하나를 골라 <b>우리 반 주제로 정하기</b>를 누르면 아이들 화면에 그 뉴스가 떠요.' : '학습지 인쇄, 교사용 자료, TV 화면 띄우기를 바로 쓸 수 있어요.'}</p>
+    <p class="muted">${mine ? '하나를 골라 <b>우리 반 주제로 정하기</b>를 누르면 QR·반코드 화면이 크게 떠요. 아이들 화면에도 그 뉴스가 떠요.' : '학습지 인쇄, 교사용 자료, TV 화면을 바로 쓸 수 있어요. <b>QR 크게 띄우기</b>로 아이들이 각자 풀게 할 수도 있어요 (답은 모이지 않아요).'}</p>
     <ol class="rank-list">${DAY.items.map(it => `
       <li><span class="num">${it.rank}</span><div>
         <span class="tag ${it.type}">${TYPE_NAME[it.type]}</span><span class="tag cat">${esc(it.category)}</span>
@@ -140,6 +141,7 @@ VIEWS.teacherHome = () => {
         <p class="muted">선정 이유: ${esc(it.reason)}</p>
         <div class="row">
           ${mine && full(it) ? `<button class="btn ${topicRank === it.rank ? 'ghost' : 'sun'} small-btn" data-topic="${it.rank}" type="button">${topicRank === it.rank ? '✓ 우리 반 주제' : '우리 반 주제로 정하기'}</button>` : ''}
+          ${full(it) && (!mine || topicRank === it.rank) ? `<button class="btn ${mine ? 'sun' : 'ghost'} small-btn" data-share="${it.rank}" type="button">QR 크게 띄우기</button>` : ''}
           ${full(it) ? `<button class="btn small-btn" data-tv="${it.rank}" type="button">TV 화면</button>
             <button class="btn ghost small-btn" data-print="${it.rank}" type="button">학습지 인쇄</button>
             <button class="btn ghost small-btn" data-guide="${it.rank}" type="button">교사용</button>` : ''}
@@ -157,6 +159,7 @@ VIEWS.teacherHome = () => {
   else toSetup.onclick = () => go('classSetup');
   document.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => setTopic(mine, Number(b.dataset.topic), b));
   document.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { ITEM = itemByRank(b.dataset.tv); tvMode = true; state = {}; STUDENT = {number:'', name:'우리 반'}; go('step', {i:0, r:ITEM.rank, tv:1}); });
+  document.querySelectorAll('[data-share]').forEach(b => b.onclick = () => go('share', {r:Number(b.dataset.share)}));
   document.querySelectorAll('[data-print]').forEach(b => b.onclick = () => printSheet(itemByRank(b.dataset.print), false));
   document.querySelectorAll('[data-guide]').forEach(b => b.onclick = () => go('guide', {r:Number(b.dataset.guide)}));
   document.querySelectorAll('[data-reason]').forEach(b => b.onclick = () => sendFeedback(b.dataset.reason));
@@ -180,7 +183,7 @@ async function setTopic(mine, rank, btn){
   catch(e){ try{ await fetch(mine.url, {method:'POST', body:payload, mode:'no-cors'}); ok = true; }catch(e2){} }
   if(!ok){ btn.disabled = false; btn.textContent = '다시 눌러 주세요 (저장 실패)'; return; }
   LS.set(`topic:${mine.url}:${DAY.date}`, rank);
-  VIEWS.teacherHome();
+  go('share', {r:rank});
 }
 
 async function sendFeedback(reason){
@@ -190,6 +193,39 @@ async function sendFeedback(reason){
     fbMsg.textContent = '보냈어요. 고맙습니다.';
   }catch(e){ fbMsg.textContent = '보내지 못했어요. 인터넷 연결을 확인해 주세요.'; }
 }
+
+/* ───────── 주제 공유: 큰 QR + 반코드 ───────── */
+const soloLink = it => `${BASE}?date=${DAY.date}&r=${it.rank}&solo=1`;
+VIEWS.share = ({r}) => {
+  if(!teacherOK()) return go('teacherGate', {}, true);
+  const it = itemByRank(r), mine = LS.get('myClass', null);
+  const link = mine ? classLink(mine) : soloLink(it);
+  show(`<div class="share">
+      <p class="muted">${r}순위 · ${TYPE_NAME[it.type]}</p>
+      <h2 class="share-title">${esc(it.title)}</h2>
+      <div class="share-grid">
+        <div class="share-qr" id="bigQR" aria-label="들어오는 QR 코드"></div>
+        <div class="share-info">
+          ${mine && mine.code ? `<p class="muted">반코드</p><div class="share-code">${esc(mine.code)}</div>` : ''}
+          <p class="share-how">${mine
+            ? (mine.code ? '학생 → 반코드 입력, 또는 QR 찍기' : 'QR을 찍어 들어와요')
+            : 'QR을 찍어 들어와요<br><span class="muted">반을 만들지 않아 답은 모이지 않아요</span>'}</p>
+        </div>
+      </div>
+      <h3>어떻게 할까요?</h3>
+      <div class="choice two-col">
+        <button class="big" id="shTV" type="button"><strong>교실 화면으로 함께 보기</strong><span>영상부터 TV에 띄우고 다 같이 이야기해요</span></button>
+        <button class="big" id="shSolo" type="button"><strong>아이들이 각자 보기</strong><span>이 화면을 띄워 두면 아이들이 QR${mine && mine.code ? '·반코드' : ''}로 들어와 각자 풀어요</span></button>
+      </div>
+      <div class="row"><button class="btn ghost small-btn" id="shFull" type="button">전체 화면</button>
+        <button class="btn ghost small-btn" id="shBack" type="button">뉴스 목록으로</button></div>
+    </div>`, true);
+  drawQR(document.getElementById('bigQR'), link, 360);
+  shTV.onclick = () => { ITEM = it; tvMode = true; state = {}; STUDENT = {number:'', name:'우리 반'}; go('step', {i:0, r:it.rank, tv:1}); };
+  shSolo.onclick = () => { shSolo.querySelector('span').textContent = '아이들이 들어오는 동안 이 화면을 그대로 띄워 두세요.'; document.getElementById('bigQR').scrollIntoView({behavior:'smooth', block:'center'}); };
+  shFull.onclick = () => { const el = document.documentElement; (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => {}); };
+  shBack.onclick = () => go('teacherHome');
+};
 
 /* ───────── 교사용 자료 ───────── */
 function questionLabel(it, k){
@@ -382,11 +418,19 @@ VIEWS.review = ({r}) => {
 /* ───────── 학습 단계 ───────── */
 const STEPS = ['영상 보기','오늘의 낱말','육하원칙','핵심 활동','사실일까 의견일까','마무리'];
 const saveAns = () => { if(!tvMode) LS.set(`ans:${DAY.date}:${ITEM.rank}`, state); };
+VIEWS.soloHome = ({r}) => {
+  ITEM = itemByRank(r); soloMode = true; tvMode = false;
+  state = LS.get(`ans:${DAY.date}:${ITEM.rank}`, {});
+  show(`${banners(false)}<div class="today"><span class="tag ${ITEM.type}">${TYPE_NAME[ITEM.type]}</span>
+    <h2 style="margin-top:10px">${esc(ITEM.title)}</h2><p class="muted">영상 보기 3~5분, 학습지 10~15분</p>
+    <div class="row"><button class="btn sun" id="startBtn" type="button">시작하기</button></div></div>`);
+  startBtn.onclick = () => go('step', {i:0, r:ITEM.rank});
+};
 
 VIEWS.step = ({i, r, tv}) => {
   if(!ITEM || ITEM.rank !== Number(r)) ITEM = itemByRank(r);
   tvMode = !!tv;
-  if(!tvMode && !(CLASS && STUDENT)) return go('home', {}, true);
+  if(!tvMode && !soloMode && !(CLASS && STUDENT)) return go('home', {}, true);
   const it = ITEM;
   const bar = `<div class="progress" aria-hidden="true">${STEPS.map((_,k) => `<i class="${k<i?'done':k===i?'on':''}"></i>`).join('')}</div>
     <p class="step-name">${i+1} / ${STEPS.length} · ${STEPS[i]}${tvMode ? ' · TV 화면' : ''}</p>`;
@@ -533,6 +577,14 @@ function challengeBox(){
 }
 function finishStep(bar, toStep){
   const s = scores();
+  if(soloMode){
+    show(bar + challengeBox() + `<div class="panel done-card"><div class="medal" aria-hidden="true">☀️</div><h2>오늘의 시사 끝!</h2>
+      <p>낱말 ${s.w}/${s.wn} · 사실·의견 ${s.f}/${s.fn}</p><p class="muted">쓴 내용은 선생님께 말로 나눠 보세요.</p>
+      <div class="row" style="justify-content:center"><button class="btn ghost" id="prev" type="button">이전</button></div></div>`);
+    bindWrites();
+    prev.onclick = () => toStep(4);
+    return;
+  }
   if(tvMode){
     show(bar + challengeBox() + `<div class="panel done-card"><div class="medal" aria-hidden="true">☀️</div><h2>오늘의 시사 끝!</h2>
       <div class="row" style="justify-content:center"><button class="btn ghost" id="prev" type="button">이전</button>
@@ -669,6 +721,8 @@ async function boot(){
 
   // 학습지 QR로 들어온 '다시 보기'
   if(qs.get('v') && qs.get('r')) return go('review', {r:Number(qs.get('r'))}, true);
+  // 반 없이 선생님 QR로 들어온 '혼자 풀기'
+  if(qs.get('solo') && qs.get('r')) return go('soloHome', {r:Number(qs.get('r'))}, true);
 
   // 학생 링크(QR)로 들어온 경우
   const c = qs.get('c'), u = qs.get('u');

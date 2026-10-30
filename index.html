@@ -169,7 +169,17 @@ ol.steps{padding-left:22px}ol.steps li{margin:6px 0}
 .picked-topic{display:inline-block;background:var(--sun);border-radius:999px;padding:2px 12px;font-size:14px}
 .big-link{display:block;text-align:center;font-size:20px;padding:16px}
 .small-btn{padding:8px 14px;font-size:15px}
-@media (max-width:520px){.w5in{grid-template-columns:1fr}}
+.wrap.wide{max-width:1100px}
+.share{text-align:center}
+.share-title{font-size:34px;line-height:1.3;margin:6px 0 18px}
+.share-grid{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0 24px}
+.share-qr{background:#fff;padding:14px;border-radius:var(--r-lg);border:3px solid var(--line)}
+.share-qr img,.share-qr canvas{width:min(360px,70vw)!important;height:auto!important;display:block}
+.share-code{font-size:clamp(48px,11vw,96px);letter-spacing:.12em;line-height:1.1;background:var(--sun-soft);border-radius:var(--r-lg);padding:8px 22px}
+.share-how{font-size:20px;margin-top:12px}
+.share .choice.two-col{grid-template-columns:1fr 1fr;text-align:left}
+.share h3{text-align:left}
+@media (max-width:520px){.w5in{grid-template-columns:1fr}.share .choice.two-col{grid-template-columns:1fr}.share-title{font-size:26px}}
 @media print{ #print .qr{float:right;width:19mm;text-align:center;font-size:7pt;line-height:1.1;margin:0 0 1mm 3mm} #print .qr img{width:19mm;height:19mm;display:block} }
 </style>
 </head>
