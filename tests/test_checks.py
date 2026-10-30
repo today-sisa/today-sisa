@@ -41,3 +41,18 @@ assert picks[1]["type"] == "useful"   # 언론사 1곳 media → useful
 assert len([p for p in picks if p["category"] == "사회"]) == 2
 assert picks[-1]["type"] == "useful"
 print("모든 검사 통과")
+
+# 중립 검사: 2~5순위 제목의 한쪽으로 기운 표현
+bad2 = copy.deepcopy(ws)
+bad2["others"][0]["title"] = "청년에게 힘이 되는 기본소득"
+assert any("기운 표현" in p for p in g.check_worksheet(cfg, bad2, pick, src))
+
+# 언론사 골고루 섞기: 연합뉴스 100건 + 방송사 몇 건
+many = [{"source": "연합뉴스", "title": f"연합 기사 {i}", "desc": "", "link": f"https://y/{i}", "via": "direct"} for i in range(100)]
+many += [{"source": s, "title": f"{s} 기사 {i}", "desc": "", "link": f"https://{s}/{i}", "via": "google"}
+         for s in ["YTN", "KBS", "SBS"] for i in range(5)]
+mixed = g.apply_banned(cfg, many)
+dist = g.RUN["candidates_by_source"]
+print(dist)
+assert len(mixed) == cfg["max_candidates"] and all(dist[s] == 5 for s in ["YTN", "KBS", "SBS"])
+print("추가 검사 통과")

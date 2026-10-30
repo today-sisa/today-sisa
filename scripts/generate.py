@@ -32,6 +32,7 @@ KST = dt.timezone(dt.timedelta(hours=9))
 UA = "Mozilla/5.0 (compatible; TodayNewsForKids/1.0; +https://github.com)"
 
 MOCK = False
+RUN: dict = {"feeds": [], "notes": []}  # 실행 요약 (data/last_run.json 으로 저장)
 
 
 def log(*a):
@@ -98,6 +99,8 @@ def fetch_candidates(cfg: dict) -> list[dict]:
             parsed = feedparser.parse(raw)
         except Exception as e:  # 한 피드가 막혀도 나머지로 진행
             log(f"피드 실패: {f['source']} ({e})")
+            RUN["feeds"].append({"source": f["source"], "via": f.get("via", "direct"), "count": 0,
+                                 "error": str(e)[:120]})
             continue
         count = 0
         for e in parsed.entries:
@@ -125,14 +128,28 @@ def fetch_candidates(cfg: dict) -> list[dict]:
             })
             count += 1
         log(f"피드 {f['source']}{'(구글)' if f.get('via') == 'google' else ''}: {count}건")
+        RUN["feeds"].append({"source": f["source"], "via": f.get("via", "direct"), "count": count,
+                             "raw_entries": len(parsed.entries)})
     return items
 
 
 def apply_banned(cfg: dict, items: list[dict]) -> list[dict]:
     banned = cfg.get("banned_words", [])
-    out = [it for it in items if not any(b in it["title"] or b in it["desc"] for b in banned)]
-    log(f"금지어 필터: {len(items)} → {len(out)}건")
-    out = out[: cfg.get("max_candidates", 90)]
+    kept = [it for it in items if not any(b in it["title"] or b in it["desc"] for b in banned)]
+    log(f"금지어 필터: {len(items)} → {len(kept)}건")
+    # 언론사별로 골고루 섞기 (한 언론사가 후보 칸을 다 차지하지 않도록)
+    by_src: dict[str, list] = {}
+    for it in kept:
+        by_src.setdefault(it["source"], []).append(it)
+    limit = cfg.get("max_candidates", 90)
+    out, i = [], 0
+    while len(out) < limit and any(i < len(v) for v in by_src.values()):
+        for v in by_src.values():
+            if i < len(v) and len(out) < limit:
+                out.append(v[i])
+        i += 1
+    RUN["candidates_by_source"] = {k: sum(1 for x in out if x["source"] == k) for k in by_src}
+    log("후보 언론사 분포:", RUN["candidates_by_source"])
     for n, it in enumerate(out):
         it["id"] = n
     return out
@@ -171,6 +188,7 @@ def gemini(cfg: dict, prompt: str, mock_name: str, temperature: float = 0.4) -> 
                 text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
                 text = re.sub(r"^```(json)?|```$", "", text.strip()).strip()
                 log(f"Gemini 응답 받음 ({model})")
+                RUN["model"] = model
                 return json.loads(text)
             except (json.JSONDecodeError, KeyError, IndexError) as e:
                 last = f"{model} 응답 형식 오류 {e}"
@@ -454,6 +472,14 @@ def check_worksheet(cfg: dict, ws: dict, pick: dict, source_text: str) -> list[s
             for r in reasons:
                 too_long(f"{side} 이유", r, LIMITS["reason"])
     too_long("도전 문항", m.get("challenge", ""), LIMITS["question"] + 15)
+    # 중립 검사: 제목·요약·발문에 한쪽으로 기운 표현이 있으면 안 됨 (찬반 이유·의견 문장은 제외)
+    neutral_text = all_text([m.get("title", ""), m.get("summary", []), act.get("issue", ""),
+                             {k: v for k, v in act.items() if k.endswith("_question")},
+                             [[o.get("title", ""), o.get("brief_summary", []), o.get("question", "")]
+                              for o in ws.get("others", [])]])
+    loaded = [w for w in cfg.get("loaded_words", []) if w in neutral_text]
+    if loaded:
+        problems.append(f"한쪽으로 기운 표현: {', '.join(loaded)} (제목·요약·발문은 중립적으로)")
     text = all_text(ws)
     hit = [b for b in cfg["banned_words"] if len(b) >= 2 and b in text and b not in ("속보", "단독", "포토", "날씨", "광고")]
     if hit:
@@ -560,7 +586,38 @@ def set_hidden(date: str, hidden: bool):
 
 # ─────────────────────────── 실행 ───────────────────────────
 
+def write_run_summary(status: str):
+    RUN["status"] = status
+    RUN["finished_at"] = dt.datetime.now(KST).isoformat(timespec="minutes")
+    try:
+        DATA.mkdir(parents=True, exist_ok=True)
+        (DATA / "last_run.json").write_text(json.dumps(RUN, ensure_ascii=False, indent=1), encoding="utf-8")
+    except Exception:
+        pass
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        lines = [f"## 오늘의 시사 실행 결과: {status}", "", "| 피드 | 기사 수 | 비고 |", "|---|---|---|"]
+        for f in RUN["feeds"]:
+            lines.append(f"| {f['source']}{' (구글)' if f['via'] == 'google' else ''} | {f['count']} | {f.get('error', '')} |")
+        for n in RUN.get("notes", []):
+            lines.append(f"\n- {n}")
+        with open(path, "a", encoding="utf-8") as fp:
+            fp.write("\n".join(lines) + "\n")
+
+
 def main():
+    if "--hide" in sys.argv or "--unhide" in sys.argv:
+        return run()
+    try:
+        run()
+        write_run_summary(RUN.get("status_override", "성공"))
+    except BaseException as e:
+        RUN["notes"].append(f"오류: {e}")
+        write_run_summary("실패")
+        raise
+
+
+def run():
     global MOCK
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true")
@@ -580,6 +637,7 @@ def main():
     reason = should_skip(cfg, d)
     if reason and not a.force:
         log(f"{d} 은(는) {reason}이라 건너뜁니다.")
+        RUN["status_override"] = f"건너뜀({reason})"
         return
 
     cands = apply_banned(cfg, fetch_candidates(cfg))
@@ -592,10 +650,14 @@ def main():
         raise SystemExit("선정 결과가 비었습니다. (어제 학습지가 그대로 보입니다)")
     for p in picks:
         log(f"{p['rank']}순위 [{p['type']}/{p['category']}] {by_id[p['main']]['title']}")
+    RUN["picks"] = [{"rank": p["rank"], "type": p["type"], "source": by_id[p["main"]]["source"],
+                     "title": by_id[p["main"]]["title"]} for p in picks]
 
     body = gather_body(picks[0], by_id)
     videos = find_videos(cfg, picks[0], by_id)
+    RUN["body_chars"], RUN["video_candidates"] = len(body), len(videos)
     ws = make_worksheet(cfg, picks, by_id, body, videos, d)
+    RUN["problems"] = ws["_problems"]
     if ws["_problems"]:
         log("검사에서 남은 문제(교사 검토 표시로 공개):", ws["_problems"])
     save(assemble(cfg, d, picks, by_id, ws, videos))

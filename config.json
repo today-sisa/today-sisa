@@ -27,8 +27,12 @@
     { "source": "MBC", "url": "https://imnews.imbc.com/rss/news/news_00.xml" },
     { "source": "YTN", "url": "https://news.google.com/rss/search?q=site:ytn.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
     { "source": "KBS", "url": "https://news.google.com/rss/search?q=site:news.kbs.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
-    { "source": "MBC", "url": "https://news.google.com/rss/search?q=site:imnews.imbc.com+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" }
+    { "source": "MBC", "url": "https://news.google.com/rss/search?q=site:imnews.imbc.com+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "SBS", "url": "https://news.google.com/rss/search?q=site:news.sbs.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "JTBC", "url": "https://news.google.com/rss/search?q=site:news.jtbc.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" },
+    { "source": "연합뉴스TV", "url": "https://news.google.com/rss/search?q=site:yonhapnewstv.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", "via": "google" }
   ],
+  "_feeds_순서": "직접 RSS가 막혀도 구글 뉴스 경유로 같은 언론사 기사를 받습니다. 후보는 언론사별로 골고루 섞어 AI에 보냅니다.",
   "_feeds": "주소가 막히면 그 피드만 건너뛰고 나머지로 진행합니다. 매일 기록(Actions 로그)에 피드별 기사 수가 찍힙니다.",
 
   "broadcasters": ["YTN", "KBS", "MBC", "SBS", "연합뉴스TV", "JTBC"],
@@ -51,5 +55,10 @@
     "속보", "단독", "포토", "[포토]", "날씨", "주가", "코스피", "코스닥", "환율", "비트코인", "코인",
     "부고", "인사]", "[인사", "광고", "이 시각"
   ],
+  "loaded_words": [
+    "힘이 되는", "도움이 되는 정책", "꼭 필요한", "잘못된 정책", "무책임", "충격", "경악", "황당", "어이없",
+    "역대급", "폭탄", "망신", "참담", "논란의", "발목", "꼼수", "퍼주기", "혈세", "훌륭한"
+  ],
+  "_loaded_words": "학습지의 제목·요약·발문(2~5순위 포함)에 이 말이 있으면 한쪽으로 기운 표현으로 보고 다시 쓰게 합니다. 찬반 이유와 의견 문장은 검사하지 않습니다.",
   "_banned_words": "제목이나 요약에 들어 있으면 AI에 보내기 전에 빼고, AI가 만든 학습지에 들어 있어도 다시 걸러냅니다."
 }
