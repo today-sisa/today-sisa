@@ -87,7 +87,9 @@ VIEWS.home = () => {
       <button class="big" id="goT" type="button"><strong>선생님</strong><span>오늘의 뉴스 1~5순위 보기, 우리 반 주제 정하기, 학습지 인쇄</span></button>
       <button class="big" id="goS" type="button"><strong>학생</strong><span>QR을 찍거나 반코드를 넣고 들어가요</span></button>
     </div>
+    <p class="stats" id="stats" hidden></p>
     <p class="muted"><a href="#" id="goArc">지난 학습지 보기</a></p>${footer()}`);
+  showStats();
   goT.onclick = () => go(LS.get('teacherOK', '') === CFG.TEACHER_PASS_SHA256 ? 'teacherHome' : 'teacherGate');
   goS.onclick = () => {
     const saved = LS.get('class', null);
@@ -96,6 +98,20 @@ VIEWS.home = () => {
   };
   goArc.onclick = e => { e.preventDefault(); go('archive'); };
 };
+
+// "○○명의 선생님, ○○개 반이 함께" — 하루 몇 번만 새로 가져옴, 적을 때는 숨김
+async function showStats(){
+  if(!CFG.REGISTRY_URL) return;
+  const MIN = CFG.STATS_MIN || 10;
+  let st = LS.get('stats', null);
+  if(!st || Date.now() - st.at > 3 * 3600e3){
+    try{ const j = await (await fetch(`${CFG.REGISTRY_URL}?action=stats`)).json(); if(j.ok){ st = {...j, at:Date.now()}; LS.set('stats', st); } }catch(e){}
+  }
+  const el = document.getElementById('stats');
+  if(!el || !st || st.teachers < MIN) return;
+  el.innerHTML = `🌱 지금 <b>${st.teachers.toLocaleString()}명의 선생님</b>${st.classes ? `, <b>${st.classes.toLocaleString()}개 반</b>이` : '이'} 함께 시사 공부 중`;
+  el.hidden = false;
+}
 
 /* ───────── 교사 비밀번호 ───────── */
 async function sha256(t){
@@ -145,10 +161,18 @@ VIEWS.teacherMode = () => {
   mWeb.onclick = () => { LS.set('mode', 'web'); go(LS.get('myClass', null) ? 'teacherHome' : 'classSetup', {}, true); };
 };
 
+function sayHello(mode){
+  if(!CFG.REGISTRY_URL || LS.get('helloSent', false)) return;
+  let id = LS.get('deviceId', '');
+  if(!id){ id = randKey().replace(/[^A-Za-z0-9]/g, '').slice(0, 16); LS.set('deviceId', id); }
+  fetch(`${CFG.REGISTRY_URL}?action=hello&id=${id}&mode=${mode}`).then(r => r.json()).then(j => { if(j.ok) LS.set('helloSent', true); }).catch(() => {});
+}
+
 VIEWS.teacherHome = () => {
   if(!teacherOK()) return go('teacherGate', {}, true);
   const mode = getMode();
   if(!mode) return go('teacherMode', {}, true);
+  sayHello(mode);
   const paper = mode === 'paper';
   const mine = paper ? null : LS.get('myClass', null);
   const topicRank = mine ? LS.get(`topic:${mine.url}:${DAY.date}`, null) : null;

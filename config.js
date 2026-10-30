@@ -10,5 +10,7 @@ window.TODAY_NEWS_CONFIG = {
   GRADE: "5·6학년",
   // 선생님들이 '반 만들기'에서 복사하는 답안 시트 원본 (코드가 들어 있는 시트, 링크가 있는 모든 사용자 보기)
   TEMPLATE_SHEET_COPY_URL: "https://docs.google.com/spreadsheets/d/1YXdQWr1SFtehRYtI0EkrXRnaxdhOGhk8SSXRIrXUrTw/copy",
+  // 홈 화면 "○○명의 선생님이 함께" 표시: 선생님 수가 이 숫자 이상일 때만 보여요
+  STATS_MIN: 10,
   TEACHER_PASS_SHA256: "b6408dfac4a551b5b184c06e86ae62ee5af7b9af39249edfa95f90dc23b96149"
 };

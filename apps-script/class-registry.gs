@@ -29,6 +29,7 @@ function tab_(name, headers) {
   return sh;
 }
 const classes_ = () => tab_('반', ['반코드', '시트 주소', '반 이름', '학교', '만든 날']);
+const teachers_ = () => tab_('선생님', ['기기 번호', '처음 온 날', '방식']);
 const feedback_ = () => tab_('의견', ['보낸 시각', '뉴스 날짜', '종류', '내용', '연락처', '화면']);
 
 function out_(obj) {
@@ -101,6 +102,31 @@ function doGet(e) {
       const r = classes_().getDataRange().getValues().slice(1).find(x => x[0] === code);
       if (!r) return out_({ ok: false, error: '없는 반코드입니다.' });
       return out_({ ok: true, code: r[0], url: r[1], name: r[2], school: r[3] });
+    }
+
+    if (action === 'hello') {  // 선생님 기기가 처음 들어올 때 한 번 (숫자 세기용, 개인 정보 없음)
+      const id = String(p.id || '').slice(0, 40);
+      if (!/^[A-Za-z0-9]{8,40}$/.test(id)) return out_({ ok: false });
+      const lock = LockService.getScriptLock();
+      lock.waitLock(10000);
+      try {
+        const sh = teachers_();
+        const found = sh.getLastRow() > 1 && sh.getRange(2, 1, sh.getLastRow() - 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
+        if (!found) {
+          sh.appendRow([id, new Date(), String(p.mode || '').slice(0, 10)]);
+          CacheService.getScriptCache().remove('stats');
+        }
+      } finally { lock.releaseLock(); }
+      return out_({ ok: true });
+    }
+
+    if (action === 'stats') {  // 홈 화면 "○○명의 선생님, ○○개 반" 표시용
+      const cache = CacheService.getScriptCache();
+      const hit = cache.get('stats');
+      if (hit) return out_(JSON.parse(hit));
+      const res = { ok: true, teachers: Math.max(teachers_().getLastRow() - 1, 0), classes: Math.max(classes_().getLastRow() - 1, 0) };
+      cache.put('stats', JSON.stringify(res), 600);
+      return out_(res);
     }
 
     if (action === 'feedback') {
