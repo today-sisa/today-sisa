@@ -33,13 +33,13 @@
   {
    "source": "YTN",
    "via": "google",
-   "count": 87,
+   "count": 86,
    "raw_entries": 100
   },
   {
    "source": "KBS",
    "via": "google",
-   "count": 94,
+   "count": 96,
    "raw_entries": 100
   },
   {
@@ -51,25 +51,23 @@
   {
    "source": "SBS",
    "via": "google",
-   "count": 90,
+   "count": 88,
    "raw_entries": 100
   },
   {
    "source": "JTBC",
    "via": "google",
-   "count": 90,
+   "count": 88,
    "raw_entries": 100
   },
   {
    "source": "연합뉴스TV",
    "via": "google",
-   "count": 96,
+   "count": 97,
    "raw_entries": 100
   }
  ],
- "notes": [
-  "오류: 학습지를 하나도 만들지 못했습니다. (어제 학습지가 그대로 보입니다)"
- ],
+ "notes": [],
  "candidates_by_source": {
   "연합뉴스": 13,
   "연합뉴스TV": 13,
@@ -79,61 +77,79 @@
   "KBS": 13,
   "MBC": 12
  },
- "model": "gemini-flash-latest",
+ "model": "gemini-flash-lite-latest",
  "picks": [
   {
    "rank": 1,
    "type": "debate",
-   "source": "SBS",
-   "title": "매출 320% 급증…입소문 탄 '등골 프로텍터'"
+   "source": "MBC",
+   "title": "쏟아지는 AI 음악·책‥\"내 작품도 무단 학습?\""
   },
   {
    "rank": 2,
-   "type": "useful",
-   "source": "SBS",
-   "title": "'와르르' 도로 뒤덮자 너도나도…펼쳐진 광경"
-  },
-  {
-   "rank": 3,
-   "type": "useful",
-   "source": "연합뉴스TV",
-   "title": "31호 태풍 '인파' 북상…10월 태풍 어디로?"
-  },
-  {
-   "rank": 4,
    "type": "useful",
    "source": "연합뉴스TV",
    "title": "중국도 이제 노령화 걱정…노인부양비율, 아동부양비율 첫 추월"
   },
   {
+   "rank": 3,
+   "type": "useful",
+   "source": "SBS",
+   "title": "'와르르' 도로 뒤덮자 너도나도…펼쳐진 광경"
+  },
+  {
+   "rank": 4,
+   "type": "useful",
+   "source": "연합뉴스TV",
+   "title": "31호 태풍 '인파' 북상…10월 태풍 어디로?"
+  },
+  {
    "rank": 5,
    "type": "useful",
    "source": "KBS",
-   "title": "“수많은 국민의 아버지였다”…최불암 별세에 온라인 추모 이어져"
+   "title": "주말 핼러윈 ‘인파 관리’…현장 상황실 가동"
   }
  ],
  "items": [
   {
    "rank": 1,
-   "error": "Gemini 호출 실패: gemini-2.5-flash 모델 없음"
+   "body_chars": 0,
+   "video_candidates": 1,
+   "video": true,
+   "problems": []
   },
   {
    "rank": 2,
-   "error": "Gemini 호출 실패: gemini-2.5-flash 모델 없음"
+   "body_chars": 0,
+   "video_candidates": 0,
+   "video": false,
+   "problems": []
   },
   {
    "rank": 3,
-   "error": "Gemini 호출 실패: gemini-2.5-flash 모델 없음"
+   "body_chars": 1230,
+   "video_candidates": 0,
+   "video": false,
+   "problems": []
   },
   {
    "rank": 4,
-   "error": "Gemini 호출 실패: gemini-2.5-flash 모델 없음"
+   "body_chars": 1076,
+   "video_candidates": 1,
+   "video": true,
+   "problems": [
+    "낱말 뜻 보기이(가) 너무 김 (16자, 15자 이내로): 바람이 불어 바다로 나가는 것…",
+    "낱말 뜻 보기이(가) 너무 김 (16자, 15자 이내로): 태풍이 힘을 잃고 사라지는 것…"
+   ]
   },
   {
    "rank": 5,
-   "error": "Gemini 호출 실패: gemini-2.5-flash 모델 없음"
+   "body_chars": 1137,
+   "video_candidates": 1,
+   "video": true,
+   "problems": []
   }
  ],
- "status": "실패",
- "finished_at": "2026-10-30T11:06+09:00"
+ "status": "성공",
+ "finished_at": "2026-10-30T11:13+09:00"
 }

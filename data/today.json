@@ -1,55 +1,55 @@
 {
  "version": 2,
  "date": "2026-10-30",
- "generated_at": "2026-10-30T10:55+09:00",
+ "generated_at": "2026-10-30T11:13+09:00",
  "hidden": false,
  "sample": false,
  "items": [
   {
-   "title": "수도권에 새 집 짓기 찬성? 반대?",
+   "title": "AI의 공부와 예술가의 권리",
    "words": [
     {
-     "word": "택지",
-     "meaning": "집을 짓는 데 쓰는 땅",
+     "word": "저작권",
+     "meaning": "창작물을 보호하는 권리",
      "wrong": [
-      "물건을 나르는 일",
-      "농사를 짓는 논밭"
+      "물건을 파는 권리",
+      "기계를 다루는 기술"
      ]
     },
     {
-     "word": "공급",
-     "meaning": "필요한 것을 대어 줌",
+     "word": "학습",
+     "meaning": "배워서 익히는 일",
      "wrong": [
-      "물건값을 깎아 줌",
-      "물건을 몰래 숨김"
+      "새로 만든 작품",
+      "남에게 돈을 빌림"
      ]
     }
    ],
    "summary": [
-    "정부가 수도권에 새 집을 지을 땅 여섯 곳을 정했어요.",
-    "김포와 고양 등 서울 근처 도시들이 뽑혔어요.",
-    "집이 더 필요하다는 생각과 자연을 지키자는 생각이 맞서요."
+    "인공지능이 만든 노래와 책이 늘어났습니다.",
+    "예술가들은 자기 작품을 허락 없이 썼다고 말합니다.",
+    "인공지능 개발을 위해 학습을 허용하자는 말도 나옵니다."
    ],
    "five_w": {
-    "who": "정부",
+    "who": "예술가와 기술 개발자",
     "when": "최근",
-    "where": "수도권 도시 5곳",
-    "what": "새 택지 6곳 발표",
-    "how": "새 도시를 만들어서",
-    "why": "집을 넉넉히 공급하려고"
+    "where": "우리나라와 전 세계",
+    "what": "인공지능의 작품 학습 논란",
+    "how": "인간의 창작물을 데이터로 배워서",
+    "why": "새 창작물을 만들려고"
    },
    "activity": {
-    "issue": "수도권 자연을 풀어 새 집을 지어야 할까?",
+    "issue": "AI 학습에 작품 사용을 허락받아야 할까?",
     "side_a": {
-     "title": "집 공급 찬성",
+     "title": "허락 필요",
      "reasons": [
-      "사람들이 살 집을 빠르게 늘려 집값을 안정시킬 수 있어요."
+      "작가의 노력과 창작 권리를 지켜야 합니다."
      ]
     },
     "side_b": {
-     "title": "자연 보전 찬성",
+     "title": "자유 허용",
      "reasons": [
-      "한번 없앤 숲과 자연은 다시 원래대로 되돌리기 어려워요."
+      "새로운 기술 발전을 위해 쉽게 배워야 합니다."
      ]
     },
     "choose_question": "나는 어느 쪽? 왜 그렇게 생각해?",
@@ -57,352 +57,238 @@
    },
    "facts_opinions": [
     {
-     "sentence": "정부가 신규 택지 6곳을 선정했다.",
+     "sentence": "인공지능이 만든 음악이 발표됐다.",
      "answer": "사실",
-     "reason": "실제 발표한 사실임"
+     "reason": "실제로 일어난 일이라서"
     },
     {
-     "sentence": "집을 더 짓는 정책이 가장 중요하다.",
+     "sentence": "인공지능은 예술가를 이길 수 없다.",
      "answer": "의견",
-     "reason": "사람마다 생각이 다름"
+     "reason": "사람의 생각이라서"
     },
     {
-     "sentence": "선정된 지역은 수도권 5개 도시다.",
+     "sentence": "작품 학습에 저작권 문제가 생겼다.",
      "answer": "사실",
-     "reason": "발표된 확인 내용임"
+     "reason": "실제 갈등이 있어서"
     },
     {
-     "sentence": "자연을 보전하는 것이 훨씬 낫다.",
+     "sentence": "기술 개발이 작가의 권리보다 중요하다.",
      "answer": "의견",
-     "reason": "판단이 담긴 주장임"
+     "reason": "개인의 가치 판단이라서"
     }
    ],
-   "challenge": "집도 늘리고 자연도 지키는 좋은 방법이 있을까?",
+   "challenge": "작가와 기술자가 모두 만족할 규칙을 하나 제안해 보세요.",
    "curriculum": [
-    "사회 5-1 국토와 우리 생활",
-    "사회 6-2 통일 한국의 발전과 지구촌 평화"
+    "사회 5-1 인권 존중과 정의로운 사회",
+    "사회 6-2 통일 한국의 발전과 지구촌의 미래"
    ],
    "teacher": {
     "sample_answers": {
-     "choose_question": "저는 집 공급에 찬성합니다. 살 집이 부족하면 집값이 올라 사람들이 힘들기 때문입니다. / 저는 자연 보전에 찬성합니다. 나무와 녹지가 사라지면 기후 환경이 더 나빠질 수 있기 때문입니다.",
-     "other_side_question": "자연을 지키자는 쪽의 좋은 점은 미래 세대에게 맑은 공기와 푸른 숲을 남겨줄 수 있다는 점입니다.",
-     "challenge": "빈 땅에만 새로 짓지 말고, 낡은 건물을 높여 다시 짓거나 사람이 줄어든 지역을 먼저 고쳐 쓸 수 있습니다."
+     "choose_question": "허락이 필요하다고 생각합니다. 예술가가 많은 시간과 정성을 들여 만든 창작물을 허락 없이 기계가 그대로 배우면 예술가의 노력이 존중받지 못하기 때문입니다.",
+     "other_side_question": "인공지능이 많은 자료를 자유롭게 배우면 기술이 더 빠르게 발전해서 사람들이 편리한 프로그램을 더 많이 쓸 수 있다는 점입니다.",
+     "challenge": "인공지능이 작품을 학습할 때 작가에게 적절한 사용료를 내거나 출처를 반드시 밝히도록 하는 법을 만듭니다."
     },
     "extra_questions": [
-     "우리 동네에 새 아파트 단지가 들어선다면 어떤 좋은 점과 불편한 점이 생길까요?",
-     "서울이나 수도권에 사람들이 계속 몰리는 까닭은 무엇일까요?"
+     "내가 정성껏 그린 그림을 다른 친구가 허락 없이 인공지능에 넣어 비슷한 그림을 만든다면 기분이 어떨까요?",
+     "인간 예술가의 창작 활동과 인공지능의 창작 활동에는 어떤 차이점이 있을까요?"
     ],
     "cautions": [
-     "개발 찬성과 환경 보전 중 어느 한쪽이 절대적으로 옳다고 단정 짓지 않도록 균형 있게 안내합니다.",
-     "복잡한 부동산 정책 용어보다는 '사람들이 살 집 마련'과 '자연환경 지키기'의 가치 충돌 관점으로 접근하게 돕습니다."
+     "기술 발전과 저작권 보호 중 어느 하나가 절대적으로 옳다고 단정하지 않도록 양쪽 입장의 타당성을 균형 있게 안내합니다.",
+     "학생들이 막연히 '기계가 나쁘다'거나 '기술이 무조건 우선이다'라는 단순한 이분법에 빠지지 않고, 창작자의 권리와 사회적 기술 발전의 조화를 생각해보게 돕습니다."
     ]
    },
    "rank": 1,
    "type": "debate",
-   "category": "정책",
-   "topic": "수도권 신규택지와 그린벨트",
-   "reason": "집값 안정과 주택 공급이라는 공익적 목적과 자연환경 보전이라는 가치가 맞부딪쳐 5학년 국토 개발 및 환경 단원과 연계해 토론하기 적합하다.",
-   "source": "JTBC",
-   "link": "https://news.jtbc.co.kr/article/NB12325566",
-   "original_title": "판교신도시 2.5배 넘는 규모…수도권 신규택지 6곳 선정",
-   "related": [
-    {
-     "source": "KBS",
-     "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFA1QTJHXzNYeXBpYjZZbXNWUlhHU2dmSF9qZDB4dDRUUm93OTlkQ0FQNmFaMTNhUjU2bVdXRnU1S0FMSFNXOFdkYTdZVGRORmJ4d1M5clE3NmpXd3c?oc=5"
-    },
-    {
-     "source": "YTN",
-     "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE15YUNFUWstdkN2YUNCMmlCYjBlT2Jsem5TeFFUcGdaOXktdURDdlFkSGVzWVpDNzRyMGJWYzlGYTJCYi1QdGU2cWVrSFZoYnNqWkM0aDQ1cVpRcUMzSGc?oc=5"
-    },
-    {
-     "source": "KBS",
-     "link": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1oZkJIRGNySkxNZjF0WUhaRFg2UVJtOUYxRWlER3pqb0VSUThYUW9TYVJvUUZnRGhxMUVxa0xySzg0VDdwVE81dmlsN3FTNkZQNlYwUkZlazR1bDhNNG9BZFp3S1FSSXlwcnc0?oc=5"
-    }
-   ],
-   "video": null,
-   "needs_review": false,
-   "review_notes": []
-  },
-  {
-   "title": "내 작품을 AI가 마음대로 배운다면?",
-   "words": [
-    {
-     "word": "저작권",
-     "meaning": "만든 사람의 권리",
-     "wrong": [
-      "물건을 사는 규칙",
-      "인터넷 쓰는 권리"
-     ]
-    },
-    {
-     "word": "인공지능",
-     "meaning": "생각하는 컴퓨터",
-     "wrong": [
-      "오래된 옛날 기계",
-      "사람이 만든 만화"
-     ]
-    }
-   ],
-   "summary": [
-    "AI가 글과 음악을 만듭니다.",
-    "사람 작품을 허락 없이 배웁니다.",
-    "법 규칙을 두고 생각이 갈립니다."
-   ],
-   "five_w": {
-    "who": "창작자와 기술 기업",
-    "when": "최근",
-    "where": "인터넷 세상",
-    "what": "AI의 무단 학습 논란",
-    "how": "기존 작품을 데이터로 공부함",
-    "why": "기술 발전과 권리 보호의 갈등"
-   },
-   "activity": {
-    "issue": "AI 학습에 사람 작품 써도 될까?",
-    "side_a": {
-     "title": "자유로운 사용",
-     "reasons": [
-      "새로운 기술 발전에 도움 됩니다."
-     ]
-    },
-    "side_b": {
-     "title": "창작자 보호",
-     "reasons": [
-      "창작자의 노력을 지켜야 합니다."
-     ]
-    },
-    "choose_question": "나는 어느 쪽? 왜 그렇게 생각해?",
-    "other_side_question": "반대쪽 생각의 좋은 점 한 가지는?"
-   },
-   "facts_opinions": [
-    {
-     "sentence": "AI가 많은 책과 음악을 배운다.",
-     "answer": "사실",
-     "reason": "실제 일어난 일이다."
-    },
-    {
-     "sentence": "창작자의 허락을 꼭 받아야 한다.",
-     "answer": "의견",
-     "reason": "생각과 주장이 담겼다."
-    },
-    {
-     "sentence": "법을 두고 다툼이 시작되었다.",
-     "answer": "사실",
-     "reason": "실제 벌어진 일이다."
-    },
-    {
-     "sentence": "AI 기술을 더 빠르게 키워야 한다.",
-     "answer": "의견",
-     "reason": "개인의 바람이 담겼다."
-    }
-   ],
-   "challenge": "AI와 사람이 함께 돕고 살 방법은 무엇일까?",
-   "curriculum": [
-    "사회 5-1 인권 존중과 정의로운 사회",
-    "사회 6-1 우리나라의 경제 발전"
-   ],
-   "teacher": {
-    "sample_answers": {
-     "choose_question": "창작자 보호 쪽입니다. 힘들게 만든 작품을 허락도 없이 컴퓨터가 마음대로 쓰면 다음부터 좋은 작품을 만들 마음이 사라질 것 같기 때문입니다.",
-     "other_side_question": "누구나 자유롭게 배울 수 있게 하면 인공지능 기술이 더 빠르게 발전해서 편리한 세상이 될 수 있습니다.",
-     "challenge": "AI 기업이 창작자에게 정당한 사용료를 내고 공부하도록 법 규칙을 만들면 좋겠습니다."
-    },
-    "extra_questions": [
-     "내가 직접 그린 그림이나 글을 AI가 마음대로 따라 한다면 어떤 기분이 들까요?",
-     "인공지능이 만든 그림이나 노래의 진짜 주인은 누구라고 생각하나요?"
-    ],
-    "cautions": [
-     "기술 발전이나 창작자 보호 어느 한쪽만을 정답으로 제시하지 않고, 두 가치가 충돌하는 이유를 균형 있게 이해하도록 돕습니다.",
-     "학생들이 AI를 단순한 표절 도구로 보거나 반대로 무조건 허용해야 하는 것으로 단정 짓지 않도록 지도합니다."
-    ]
-   },
-   "rank": 2,
-   "type": "debate",
    "category": "과학·환경",
-   "topic": "인공지능 학습과 저작권 갈등",
-   "reason": "학생들이 일상에서 접하는 생성형 AI 기술의 발전 이면에 있는 창작자의 저작권 보호 문제를 다루어 디지털 윤리와 지식재산권을 함께 생각해보게 한다.",
+   "topic": "AI 창작물과 저작권 갈등",
+   "reason": "디지털 기술 발달 속에서 AI 학습과 창작자의 권리 보호라는 가치 충돌을 다뤄 6학년 사회 및 실과 수업 토론 주제로 적합하다.",
    "source": "MBC",
    "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE1GY1J3c0hSbEwxWU9MU2dpR1k2eFhFMGxwRGR1V3ZqVlNmTXBOZnZmU191dXRaTlRrbE9xUGR4NDZlMDVqTnZEQlN1Ym1TTjNVN2FEalByOEpaM3ZLcjBLM2JqSXZNc1RCYk8xdFBOS1ZCNWduUEpRSdIBeEFVX3lxTE4waGxEM3VreUhfdHVYTmZJRzQwRS1USnVrb3ExMjBYalFFUU1vS2pkck5aQVFSVldQcGFXaGJrWFVzWjMtMi1MUnpxVmxmREFHYThuOUw4MXpDVHVVMVJFTkRaWWF4NUNHdUVrblF3WTVKYkNkMlJMcg?oc=5",
    "original_title": "쏟아지는 AI 음악·책‥\"내 작품도 무단 학습?\"",
    "related": [],
-   "video": null,
+   "video": {
+    "id": "ZPBqnd3wsSU",
+    "title": "쏟아지는 AI 음악·책‥\"내 작품도 무단 학습?\" (2026.10.29/뉴스데스크/MBC)",
+    "channel": "MBC News",
+    "kind": "news"
+   },
    "needs_review": false,
    "review_notes": []
   },
   {
-   "title": "안전한 중고거래 규칙이 생겨요",
+   "title": "중국의 늙어가는 사회와 고민",
    "words": [
     {
-     "word": "분쟁",
-     "meaning": "다툼이나 갈등",
+     "word": "고령화",
+     "meaning": "나이 든 어른이 많아짐",
      "wrong": [
-      "물건을 나눔",
-      "돈을 저금함"
+      "아이가 더 많이 태어남",
+      "전체 인구가 줄어듦"
      ]
     },
     {
-     "word": "표준",
-     "meaning": "따라야 할 기준",
+     "word": "부양",
+     "meaning": "가족을 돌봐 먹임",
      "wrong": [
-      "가장 싼 가격",
-      "가장 빠른 길"
+      "물건을 옮겨 줌",
+      "이야기를 들음"
      ]
     }
    ],
    "summary": [
-    "중고거래 이용자와 갈등이 함께 크게 늘었습니다.",
-    "정부가 중고거래 앱이 지킬 공통 기준을 정했습니다.",
-    "가입부터 환불까지 단계를 정해 다툼을 줄입니다."
+    "중국에서 노인이 크게 늘고 있다.",
+    "노인을 돌보는 비율이 처음으로 역전됐다.",
+    "경제와 사회에 큰 변화가 생기고 있다."
    ],
    "five_w": {
-    "who": "정부",
-    "when": "2026년 10월",
-    "where": "중고거래 플랫폼",
-    "what": "공통 기준 마련",
-    "how": "거래 절차 표준화",
-    "why": "늘어난 분쟁 해결"
+    "who": "중국",
+    "when": "최근",
+    "where": "중국",
+    "what": "노인 부양 비율 증가",
+    "how": "통계 조사로 발표",
+    "why": "출생 감소와 수명 연장"
    },
    "activity": {
-    "impact_question": "새 규칙은 나와 이웃에게 어떤 도움을 줄까?",
-    "wonder_question": "중고거래에 대해 더 알고 싶은 점은 무엇일까?"
+    "impact_question": "우리 나라에도 이런 일이 어떤 영향을 줄까?",
+    "wonder_question": "중국은 어떤 대책을 세우고 있을까?"
    },
    "facts_opinions": [
     {
-     "sentence": "중고거래 분쟁 신청이 6배 넘게 늘었다.",
+     "sentence": "중국의 노인 부양 비율이 아동을 추월했다.",
      "answer": "사실",
-     "reason": "숫자로 확인 가능함"
+     "reason": "통계로 확인된 사실이다."
     },
     {
-     "sentence": "모든 중고 물건은 믿고 사기 어렵다.",
+     "sentence": "중국 경제가 앞으로 아주 어려워질 것이다.",
      "answer": "의견",
-     "reason": "개인의 생각임"
+     "reason": "미래의 일을 예상한 것이다."
     },
     {
-     "sentence": "정부가 서비스 절차를 6단계로 정했다.",
+     "sentence": "중국 정부는 저출산 대책을 발표했다.",
      "answer": "사실",
-     "reason": "실제 정해진 일임"
+     "reason": "실제 정부의 발표 내용이다."
     },
     {
-     "sentence": "중고거래 앱 기준은 더 엄격해야 한다.",
+     "sentence": "고령화 문제는 복지 정책이 가장 중요하다.",
      "answer": "의견",
-     "reason": "사람마다 다름"
+     "reason": "개인의 생각이 담긴 말이다."
     }
    ],
-   "challenge": "안전한 거래를 위해 이용자가 지켜야 할 약속을 한 가지 써보자.",
+   "challenge": "우리나라의 고령화 문제를 해결할 아이디어를 한 줄로 써보자.",
    "curriculum": [
-    "사회 5-2 사회의 새로운 변화와 오늘날의 우리",
-    "사회 6-2 지속 가능한 지구촌"
+    "사회 5-2 우리나라의 경제 발전",
+    "사회 6-1 우리나라의 정치 발전"
    ],
    "teacher": {
     "sample_answers": {
-     "impact_question": "사기나 다툼 걱정 없이 동네 이웃과 믿고 안전하게 안 쓰는 물건을 바꿀 수 있습니다.",
-     "wonder_question": "문제가 생겼을 때 실제로 어떤 기관에서 어떻게 해결을 도와주는지 궁금합니다.",
-     "challenge": "물건의 흠집이나 고장 난 부분을 숨기지 않고 사실대로 정직하게 설명하기."
+     "impact_question": "일할 사람이 줄어들고 노인을 위한 시설이 더 많이 필요해집니다.",
+     "wonder_question": "정년 연장이나 출산 지원금을 늘리는 정책이 궁금합니다."
     },
     "extra_questions": [
-     "가족이나 내가 중고거래를 해 본 경험이 있다면 어떤 점이 편리하거나 불편했나요?",
-     "물건을 사고팔 때 판매자와 구매자가 서로 믿기 위해 어떤 태도가 필요할까요?"
+     "우리 동네에서 노인을 위한 시설을 본 적이 있나요?",
+     "인구가 줄어들면 우리 생활은 어떻게 바뀔까요?"
     ],
     "cautions": [
-     "중고거래 플랫폼 이용 시 초등학생은 반드시 보호자의 동의와 지도 아래 참여해야 함을 안내합니다.",
-     "중고거래 자체가 위험한 것이 아니라, 안전한 거래 규칙과 배려하는 태도가 중요하다는 점에 초점을 맞춥니다."
+     "특정 국가에 대한 편견이나 비난 섞인 표현을 쓰지 않도록 지도합니다.",
+     "인구 변화가 경제와 복지에 미치는 영향을 이해하는 데 초점을 맞춥니다."
     ]
    },
-   "rank": 3,
+   "rank": 2,
    "type": "useful",
-   "category": "경제",
-   "topic": "중고거래 플랫폼 안전 기준",
-   "reason": "초등학생의 이용이 잦은 중고거래 앱에서 사기나 분쟁을 막기 위한 정부 기준을 알아보며 합리적이고 안전한 경제생활 습관을 기를 수 있다.",
-   "source": "SBS",
-   "link": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008822205&plink=RSSLINK&cooper=RSSREADER",
-   "original_title": "정부, 중고거래 플랫폼 지켜야 할 공통 기준 마련",
+   "category": "세계",
+   "topic": "중국의 급격한 고령화",
+   "reason": "이웃 나라 중국의 인구 구조 변화를 통해 저출생·고령화라는 지구촌 공통의 인구 문제를 6학년 세계 여러 나라 단원과 연계해 이해하기 좋다.",
+   "source": "연합뉴스TV",
+   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9HbThDbWtaUWhUeGhOZTl3WE41SGFkSF9XejNjSGZKRWFybXp6M3kyaXRwdFFOR0Ryb3NPUkp4MjV4alNMbDJfeTRhSVBKa3lyaGpFQmc1T0RJZnl5NVJUcWVjZTFSSDA?oc=5",
+   "original_title": "중국도 이제 노령화 걱정…노인부양비율, 아동부양비율 첫 추월",
    "related": [],
    "video": null,
    "needs_review": false,
    "review_notes": []
   },
   {
-   "title": "도로에 쏟아진 사과, 함께 치운 시민들",
+   "title": "도로에 쏟아진 사과, 시민들이 도왔어요",
    "words": [
     {
      "word": "수습",
-     "meaning": "어질러진 일 처리함",
+     "meaning": "어지러운 사태를 바로잡음",
      "wrong": [
-      "새 물건 모아 둠",
-      "다른 곳으로 떠남"
+      "물건을 멀리 던져버림",
+      "새로운 일을 시작함"
      ]
     },
     {
-     "word": "인명",
-     "meaning": "사람의 생명이나 목숨",
+     "word": "인명 피해",
+     "meaning": "사람이 입은 상처나 죽음",
      "wrong": [
-      "사람의 성과 이름",
-      "유명하고 잘난 사람"
+      "건물이 무너진 피해",
+      "자동차가 망가진 사고"
      ]
     }
    ],
    "summary": [
-    "트럭이 넘어져 사과가 도로에 쏟아졌습니다.",
-    "시민들이 모여 흩어진 사과를 주워 담았습니다.",
-    "다친 사람 없이 경찰과 함께 정리를 마쳤습니다."
+    "도로에 과일 트럭이 넘어지는 사고가 났다.",
+    "상자에서 사과 수십 개가 도로에 쏟아졌다.",
+    "지나던 시민들이 모여 사과를 함께 주웠다."
    ],
    "five_w": {
-    "who": "시민들과 트럭 운전자",
-    "when": "기사에 없음",
-    "where": "부산 연산역 근처 도로",
-    "what": "사과 수습을 도움",
-    "how": "사과를 함께 주워 담아",
-    "why": "트럭이 넘어져서"
+    "who": "지나던 시민들",
+    "when": "2026년 10월",
+    "where": "부산 연산역 인근 도로",
+    "what": "쏟아진 사과를 주워 담음",
+    "how": "힘을 모아 함께 수습함",
+    "why": "위험한 도로를 정리하려고"
    },
    "activity": {
-    "impact_question": "내가 저 길에 있었다면 어떻게 했을까?",
-    "wonder_question": "사고 소식에서 더 알고 싶은 점은?"
+    "impact_question": "우리 동네에서 이런 일이 생기면 나는?",
+    "wonder_question": "트럭이 왜 넘어졌는지 더 알고 싶다."
    },
    "facts_opinions": [
     {
-     "sentence": "사과 상자 수십 개가 도로에 쏟아졌다.",
+     "sentence": "과일 트럭이 넘어지며 사과가 도로에 쏟아졌다.",
      "answer": "사실",
-     "reason": "실제로 일어난 사고 모습임"
+     "reason": "실제로 일어난 사건입니다."
     },
     {
-     "sentence": "시민들의 행동은 정이 넘치고 따뜻하다.",
+     "sentence": "시민들이 도로를 정리한 모습은 참 훈훈하다.",
      "answer": "의견",
-     "reason": "사람의 생각이나 느낌임"
+     "reason": "사람에 따라 다르게 느낄 수 있습니다."
     },
     {
-     "sentence": "다친 사람은 한 명도 없었다.",
+     "sentence": "지나던 시민 10명 안팎이 현장으로 모여들었다.",
      "answer": "사실",
-     "reason": "피해 유무를 확인한 사실임"
+     "reason": "기사에 적힌 실제 인원수입니다."
     },
     {
-     "sentence": "위험하니 시민이 나서면 안 되었다.",
+     "sentence": "이런 도움 덕분에 우리 사회는 따뜻해진다.",
      "answer": "의견",
-     "reason": "행동에 대한 개인의 생각임"
+     "reason": "글쓴이나 읽는 사람의 생각입니다."
     }
    ],
-   "challenge": "만약 도로에서 사고를 보면 먼저 할 일은 무엇일까?",
+   "challenge": "내가 만약 그 자리에 있었다면 어떻게 했을지 한 줄로 적어보기.",
    "curriculum": [
-    "도덕 5-1 따뜻한 배려, 더불어 사는 우리",
-    "사회 6-1 우리나라의 민주 정치"
+    "사회 5-1 인권 존중과 정의로운 사회",
+    "사회 6-1 우리나라의 민주주의"
    ],
    "teacher": {
     "sample_answers": {
-     "impact_question": "운전자분이 많이 놀라고 당황하셨을 텐데, 저도 다가가서 도로 가장자리로 상자를 옮기거나 경찰에 신고해 도왔을 것 같습니다.",
-     "wonder_question": "트럭이 왜 넘어지게 되었는지 그 원인과 쏟아진 사과들이 상하지 않고 잘 처리되었는지가 궁금합니다.",
-     "challenge": "도로는 2차 사고 위험이 있으므로 함부로 뛰어들지 않고, 안전한 곳에서 112나 119에 먼저 신고해야 합니다."
+     "impact_question": "나도 멈춰 서서 떨어진 물건을 같이 주워줄 것이다.",
+     "wonder_question": "트럭 운전자분이 다치지 않았는지 궁금하다."
     },
     "extra_questions": [
-     "곤경에 처한 이웃을 돕는 시민들의 모습에서 어떤 가치를 느낄 수 있나요?",
-     "도로 위에서 남을 도울 때 무엇을 가장 조심해야 할까요?"
+     "위험한 도로 위에서 도와줄 때 가장 먼저 조심해야 할 것은 무엇일까요?",
+     "작은 도움이 우리 사회에 어떤 변화를 만들 수 있을까요?"
     ],
     "cautions": [
-     "시민들의 따뜻한 협동심을 칭찬하되, 도로 위 사고 현장은 2차 교통사고의 위험이 있으므로 어린이의 경우 무작정 도로로 뛰어들기보다 안전 확보와 어른 또는 경찰 신고가 우선임을 반드시 안내해 주세요."
+     "도로 위 사고 현장인 만큼 안전에 유의하며 기사를 읽도록 지도합니다.",
+     "타인을 돕는 행동의 가치에 초점을 맞춰 이야기 나눕니다."
     ]
    },
-   "rank": 4,
+   "rank": 3,
    "type": "useful",
-   "category": "사회",
-   "topic": "사과 쏟아지자 도운 시민들",
-   "reason": "도로에 쏟아진 사과를 자발적으로 치워 위험을 막은 시민들의 모습을 통해 공동체 의식과 성숙한 배려 문화를 배울 수 있는 밝은 뉴스다.",
+   "category": "생활·문화",
+   "topic": "도로 위 사과 도운 시민들",
+   "reason": "사고 현장에서 자발적으로 나선 성숙한 시민 의식과 온정을 배우며 도덕적 실천 의지를 기를 수 있는 밝은 미담 뉴스다.",
    "source": "SBS",
    "link": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008822202&plink=RSSLINK&cooper=RSSREADER",
    "original_title": "'와르르' 도로 뒤덮자 너도나도…펼쳐진 광경",
@@ -412,93 +298,203 @@
    "review_notes": []
   },
   {
-   "title": "중국, 어린이보다 노인이 더 많아져요",
+   "title": "가을 바다에 태풍이 오는 까닭",
    "words": [
     {
-     "word": "고령화",
-     "meaning": "노인 수가 늘어남",
+     "word": "태풍",
+     "meaning": "강한 비바람을 동반한 회오리",
      "wrong": [
-      "어린이가 많아짐",
-      "높은 산에 오름"
+      "여름에만 생기는 시원한 바람",
+      "바다 밑에서 일어나는 지진"
      ]
     },
     {
-     "word": "부양",
-     "meaning": "생활을 돌봐 줌",
+     "word": "상륙",
+     "meaning": "바다에서 육지로 들어오는 것",
      "wrong": [
-      "물건을 위로 띄움",
-      "돈을 은행에 맡김"
+      "바람이 불어 바다로 나가는 것",
+      "태풍이 힘을 잃고 사라지는 것"
      ]
     }
    ],
    "summary": [
-    "중국에서 노인 인구가 빠르게 늘고 있습니다.",
-    "일하는 사람이 돌볼 노인 수가 아이 수를 넘었습니다.",
-    "인구 변화에 맞춘 새로운 사회 준비가 필요합니다."
+    "가을 바다에서 태풍이 연이어 북상하고 있다.",
+    "바다가 뜨거워져 늦은 태풍이 만들어진다.",
+    "우리나라에 직접 올 가능성은 작다."
    ],
    "five_w": {
-    "who": "중국 사회",
-    "when": "최근",
-    "where": "중국",
-    "what": "노인 비율이 아이를 넘음",
-    "how": "아이 감소와 노인 증가로",
-    "why": "오래 살고 출생아 줄어서"
+    "who": "기상청과 언론",
+    "when": "10월 가을",
+    "where": "동아시아 바다",
+    "what": "태풍 인파 북상",
+    "how": "뜨거운 바다에서 발생",
+    "why": "바다가 뜨거워져서"
    },
    "activity": {
-    "impact_question": "이 일이 우리에게 어떤 영향을 줄까?",
-    "wonder_question": "더 알고 싶은 점 한 가지를 써 보자."
+    "impact_question": "가을 태풍이 오면 우리 생활엔 어떤 영향이 생길까?",
+    "wonder_question": "올해 태풍이 왜 이렇게 많이 생겼을까?"
    },
    "facts_opinions": [
     {
-     "sentence": "중국의 노인 부양비가 아동을 앞질렀다.",
+     "sentence": "제주산간에 400㎜의 비가 내렸다.",
      "answer": "사실",
-     "reason": "통계로 확인 가능함"
+     "reason": "실제 내린 비의 양이다."
     },
     {
-     "sentence": "노인이 많아지면 나라가 더 힘들어질 것이다.",
+     "sentence": "올해는 태풍이 너무 많이 발생했다.",
      "answer": "의견",
-     "reason": "사람의 생각임"
+     "reason": "많고 적음에 대한 생각이다."
     },
     {
-     "sentence": "중국의 전체 인구 구조가 변하고 있다.",
+     "sentence": "31호 태풍 인파가 북상하고 있다.",
      "answer": "사실",
-     "reason": "실제 일어난 변화임"
+     "reason": "현재 일어나고 있는 일이다."
     },
     {
-     "sentence": "중국은 아이를 더 많이 낳게 해야만 한다.",
+     "sentence": "우리나라에는 태풍이 오기 힘들 것이다.",
      "answer": "의견",
-     "reason": "주장과 판단임"
+     "reason": "앞으로의 일을 예상한 것이다."
     }
    ],
-   "challenge": "우리나라와 중국의 고령화 대책을 하나씩 찾아 비교해 보자.",
+   "challenge": "여름이 아닌 가을에 태풍이 자주 발생하는 까닭은 무엇일까요?",
    "curriculum": [
-    "사회 5-2 사회 변화와 문화 다양성",
-    "사회 6-2 지구촌의 평화와 발전"
+    "사회 5-1 우리 국토의 자연환경",
+    "사회 6-1 지구촌 환경 문제와 대응"
    ],
    "teacher": {
     "sample_answers": {
-     "impact_question": "가까운 나라인 중국의 일하는 사람이 줄면 공산품 무역이나 우리 경제에도 큰 영향을 줄 수 있습니다.",
-     "wonder_question": "중국 정부는 노인들을 위해 어떤 복지 제도나 병원 시설을 준비하고 있는지 궁금합니다.",
-     "challenge": "우리나라는 늘봄학교나 육아휴직 확대 같은 저출생 대책을 쓰고, 중국은 출산 장려금이나 정년 연장 등을 시도하고 있습니다."
+     "impact_question": "농작물이 피해를 입거나 강풍으로 건물이 흔들릴 수 있습니다.",
+     "wonder_question": "바다의 온도가 높아지는 정확한 원인이 궁금합니다.",
+     "challenge": "지구 온난화로 바다의 온도가 높아졌기 때문입니다."
     },
     "extra_questions": [
-     "세계에서 인구가 매우 많은 중국에 노인이 많아지면 전 세계 경제에는 어떤 변화가 생길까요?",
-     "우리가 사는 마을에서 노인과 어린이가 함께 행복하게 살아가려면 어떤 시설이 더 필요할까요?"
+     "지구 온난화가 날씨에 어떤 변화를 줄까요?",
+     "태풍이 올 때 우리가 조심해야 할 점은 무엇인가요?"
     ],
     "cautions": [
-     "고령화를 단순히 '부담스러운 문제'나 '부정적인 현상'으로만 보지 않고, 의학 발달로 인한 자연스러운 변화이자 새로운 복지·기술 산업이 발전할 기회로도 균형 있게 바라보도록 안내합니다."
+     "기후 변화에 대한 불안감을 지나치게 심어주지 않도록 지도합니다.",
+     "사실과 의견을 구분할 때 객관적 수치가 있는지 확인하게 합니다."
+    ]
+   },
+   "rank": 4,
+   "type": "useful",
+   "category": "과학·환경",
+   "topic": "가을 바다와 10월 태풍",
+   "reason": "해수면 온도 상승과 늦가을 태풍 발생의 상관관계를 통해 5학년 날씨와 계절 변화, 지구온난화 문제를 과학적으로 살펴볼 수 있다.",
+   "source": "연합뉴스TV",
+   "link": "https://www.yonhapnewstv.co.kr/news/MYH20261030052801FCT",
+   "original_title": "31호 태풍 '인파' 북상…10월 태풍 어디로?",
+   "related": [],
+   "video": {
+    "id": "vbmlAOxhYoc",
+    "title": "31호 태풍 '인파' 북상…10월 태풍 어디로? / 연합뉴스TV (YonhapnewsTV)",
+    "channel": "연합뉴스TV",
+    "kind": "news"
+   },
+   "needs_review": true,
+   "review_notes": [
+    "낱말 뜻 보기이(가) 너무 김 (16자, 15자 이내로): 바람이 불어 바다로 나가는 것…",
+    "낱말 뜻 보기이(가) 너무 김 (16자, 15자 이내로): 태풍이 힘을 잃고 사라지는 것…"
+   ]
+  },
+  {
+   "title": "핼러윈 축제 기간 안전 관리 강화",
+   "words": [
+    {
+     "word": "인파",
+     "meaning": "구름처럼 많이 몰린 사람떼",
+     "wrong": [
+      "안전하게 길을 건너는 사람",
+      "축제에서 춤을 추는 사람"
+     ]
+    },
+    {
+     "word": "병목",
+     "meaning": "길이 좁아져 통과가 힘든 곳",
+     "wrong": [
+      "물이 가득 고여 있는 호수",
+      "자동차가 빠르게 달리는 도로"
+     ]
+    }
+   ],
+   "summary": [
+    "경찰이 핼러윈 기간 인파를 관리한다.",
+    "전국 28곳에 인력을 배치해 살핀다.",
+    "위기 경보를 주의로 높여 대응한다."
+   ],
+   "five_w": {
+    "who": "경찰과 정부",
+    "when": "핼러윈 기간",
+    "where": "전국 28곳",
+    "what": "인파 안전 관리",
+    "how": "기동대와 상황실 투입",
+    "why": "사고와 범죄 예방"
+   },
+   "activity": {
+    "impact_question": "내가 사는 곳에 사람이 많이 모인다면?",
+    "wonder_question": "안전한 축제를 위해 우리가 지킬 점은?"
+   },
+   "facts_opinions": [
+    {
+     "sentence": "경찰이 전국 28곳에 인력을 배치한다.",
+     "answer": "사실",
+     "reason": "기사에 나온 실제 계획이다."
+    },
+    {
+     "sentence": "행정안전부와 위기경보를 높였다.",
+     "answer": "사실",
+     "reason": "기사에 보도된 내용이다."
+    },
+    {
+     "sentence": "현장 통제는 철저할수록 좋다.",
+     "answer": "의견",
+     "reason": "사람마다 생각이 다르다."
+    },
+    {
+     "sentence": "안전 관리가 사고를 잘 막을 것이다.",
+     "answer": "의견",
+     "reason": "앞으로의 일을 예상한 것이다."
+    }
+   ],
+   "challenge": "사람이 몰린 곳에서 길을 잃었을 때 대처법은?",
+   "curriculum": [
+    "사회 5-1 인권 존중과 정의로운 사회",
+    "사회 6-1 우리나라의 정치 발전"
+   ],
+   "teacher": {
+    "sample_answers": {
+     "impact_question": "질서 있게 줄을 서고 안내에 따라 이동한다.",
+     "wonder_question": "사람이 너무 많을 때 어떻게 안전하게 대피할까?",
+     "challenge": "주변 사람에게 도움을 요청하고 안전한 곳으로 이동한다."
+    },
+    "extra_questions": [
+     "축제 장소에서 왜 일방통행을 할까요?",
+     "우리가 지킬 수 있는 안전 약속은 무엇이 있나요?"
+    ],
+    "cautions": [
+     "특정 사고나 희생자에 대한 감상적 접근보다는 공공의 안전과 질서에 초점을 맞춰 지도한다."
     ]
    },
    "rank": 5,
    "type": "useful",
-   "category": "세계",
-   "topic": "중국의 고령화와 인구 변화",
-   "reason": "이웃 나라 중국의 노인 인구 급증 현상을 통해 6학년 사회의 지구촌 인구 문제와 저출산·고령화 사회의 과제를 비교해 살펴볼 수 있다.",
-   "source": "연합뉴스TV",
-   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9HbThDbWtaUWhUeGhOZTl3WE41SGFkSF9XejNjSGZKRWFybXp6M3kyaXRwdFFOR0Ryb3NPUkp4MjV4alNMbDJfeTRhSVBKa3lyaGpFQmc1T0RJZnl5NVJUcWVjZTFSSDA?oc=5",
-   "original_title": "중국도 이제 노령화 걱정…노인부양비율, 아동부양비율 첫 추월",
-   "related": [],
-   "video": null,
+   "category": "사회",
+   "topic": "핼러윈 인파 안전 관리",
+   "reason": "축제 기간 많은 사람이 모이는 장소에서의 공공 안전 대책과 안전 수칙 준수의 중요성을 배울 수 있다.",
+   "source": "KBS",
+   "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1hR0xiNFhYQ051Y0lsTjBYbVBhZDA0Qmt3cjRkSHUwMUdOZGlfQmd5bVpzd1FuUlRrdndNc2k3dENWWkhKMTFpaFFGQ1JYQ25CVktYRlQ1UzZXbU0?oc=5",
+   "original_title": "주말 핼러윈 ‘인파 관리’…현장 상황실 가동",
+   "related": [
+    {
+     "source": "연합뉴스",
+     "link": "https://www.yna.co.kr/view/AKR20261030069000004"
+    }
+   ],
+   "video": {
+    "id": "wTFS47tg09w",
+    "title": "주말 핼러윈 ‘인파 관리’…현장 상황실 가동 / KBS 2026.10.29.",
+    "channel": "KBS News",
+    "kind": "news"
+   },
    "needs_review": false,
    "review_notes": []
   }
