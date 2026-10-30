@@ -258,6 +258,17 @@ VIEWS.guide = ({r}) => {
 };
 
 /* ───────── 반 만들기 ───────── */
+const GUIDE = [
+  {img:'1-apps-script', t:'복사한 시트에서 <b>확장 프로그램 → Apps Script</b>를 눌러요.', alt:'확장 프로그램 메뉴의 Apps Script'},
+  {img:'2-editor', t:'코드가 이미 들어 있어요. 고치지 말고 오른쪽 위 <b>배포</b>를 눌러요.', alt:'코드가 들어 있는 Apps Script 화면'},
+  {img:'3-deploy-menu', t:'<b>새 배포</b>를 골라요.', alt:'배포 메뉴의 새 배포'},
+  {img:'4-gear', t:'왼쪽 <b>유형 선택</b> 옆 톱니바퀴를 눌러요.', alt:'새 배포 창의 톱니바퀴'},
+  {img:'5-webapp', t:'<b>웹 앱</b>을 골라요.', alt:'유형 목록의 웹 앱'},
+  {img:'6-settings', t:'실행: <b>나</b>, 액세스 권한: <b>모든 사용자</b>로 맞추고 아래 <b>배포</b>를 눌러요.', alt:'웹 앱 설정 화면'},
+  {img:'7-approve', t:'<b>액세스 승인</b>을 누르고 내 구글 계정을 골라요.', alt:'액세스 승인 버튼'},
+  {img:'8-continue', t:'"확인되지 않은 앱" 경고가 나오면 <b>고급 → (안전하지 않음)으로 이동</b>을 누르고, 이 화면에서 <b>Continue(허용)</b>를 눌러요. 선생님 시트 안의 코드라 괜찮아요.', alt:'권한 허용 화면'},
+  {img:'9-url', t:'<b>웹 앱 URL</b> 아래 <b>복사</b>를 눌러요. 배포 ID가 아니라 URL을 복사해야 해요.', alt:'배포 완료 화면의 웹 앱 URL 복사 버튼'},
+];
 let gsCode = '';
 VIEWS.classSetup = async () => {
   show(`<h2>반 만들기</h2>
@@ -266,10 +277,11 @@ VIEWS.classSetup = async () => {
       <li><b>답안 시트 사본 만들기</b>
         ${CFG.TEMPLATE_SHEET_COPY_URL ? `<div class="row"><a class="btn sun" href="${esc(CFG.TEMPLATE_SHEET_COPY_URL)}" target="_blank" rel="noopener">구글 시트 사본 만들기</a></div>
         <span class="muted">새 창에서 <b>사본 만들기</b>를 누르면 내 드라이브에 시트가 생겨요. 이름은 '오늘의 시사 답안 - ○반'처럼 바꿔도 돼요.</span>` : '<span class="muted">아래 "코드 직접 붙여 넣기" 방법으로 해 주세요.</span>'}</li>
-      <li><b>웹 앱으로 배포하기</b><br>
-        만든 시트에서 <b>확장 프로그램 → Apps Script</b>를 열고, 오른쪽 위 <b>배포 → 새 배포</b> → 톱니바퀴 → <b>웹 앱</b>을 골라요.
-        실행: <b>나</b>, 액세스: <b>모든 사용자</b>로 하고 <b>배포</b>를 눌러요.<br>
-        <span class="muted">권한 창이 나오면 계정 선택 → <b>고급</b> → <b>(안전하지 않음)으로 이동</b> → <b>허용</b>. 선생님 시트 안의 코드라 괜찮아요.</span></li>
+      <li><b>웹 앱으로 배포하기</b> <span class="muted">(그림을 따라 하세요)</span>
+        <div class="guide">${GUIDE.map((g, k) => `
+          <figure class="g-step"><figcaption><span class="g-num">${k+1}</span><span>${g.t}</span></figcaption>
+            <img src="img/setup/${g.img}.png" alt="${esc(g.alt)}" loading="lazy"></figure>`).join('')}
+        </div></li>
       <li><b>웹 앱 URL 붙여 넣기</b><br>배포가 끝나면 나오는 <b>웹 앱 URL</b>을 복사해서 아래 칸에 붙여 넣어요.</li>
     </ol>
     <details><summary class="muted">사본 만들기가 안 되면: 코드 직접 붙여 넣기</summary>
