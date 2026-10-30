@@ -280,7 +280,7 @@ VIEWS.classSetup = async () => {
       <li><b>웹 앱으로 배포하기</b> <span class="muted">(그림을 따라 하세요)</span>
         <div class="guide">${GUIDE.map((g, k) => `
           <figure class="g-step"><figcaption><b class="g-num">${k+1}]</b><span>${g.t}</span></figcaption>
-            <img src="img/setup/${g.img}.png" alt="${esc(g.alt)}" loading="lazy"></figure>`).join('')}
+            <img src="img/setup/${g.img}.png?v=2" alt="${esc(g.alt)}" loading="lazy"></figure>`).join('')}
         </div></li>
       <li><b>웹 앱 URL 붙여 넣기</b><br>배포가 끝나면 나오는 <b>웹 앱 URL</b>을 복사해서 아래 칸에 붙여 넣어요.</li>
     </ol>
