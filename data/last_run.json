@@ -39,13 +39,13 @@
   {
    "source": "KBS",
    "via": "google",
-   "count": 88,
+   "count": 97,
    "raw_entries": 100
   },
   {
    "source": "MBC",
    "via": "google",
-   "count": 92,
+   "count": 93,
    "raw_entries": 100
   },
   {
@@ -57,19 +57,17 @@
   {
    "source": "JTBC",
    "via": "google",
-   "count": 88,
+   "count": 91,
    "raw_entries": 100
   },
   {
    "source": "연합뉴스TV",
    "via": "google",
-   "count": 95,
+   "count": 96,
    "raw_entries": 100
   }
  ],
- "notes": [
-  "오류: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)"
- ],
+ "notes": [],
  "candidates_by_source": {
   "연합뉴스": 13,
   "연합뉴스TV": 13,
@@ -79,6 +77,42 @@
   "KBS": 13,
   "MBC": 12
  },
- "status": "실패",
- "finished_at": "2026-10-30T10:15+09:00"
+ "model": "gemini-flash-latest",
+ "picks": [
+  {
+   "rank": 1,
+   "type": "useful",
+   "source": "연합뉴스TV",
+   "title": "31호 태풍 '인파' 북상…10월 태풍 어디로?"
+  },
+  {
+   "rank": 2,
+   "type": "debate",
+   "source": "JTBC",
+   "title": "판교신도시 2.5배 넘는 규모…수도권 신규택지 6곳 선정"
+  },
+  {
+   "rank": 3,
+   "type": "useful",
+   "source": "SBS",
+   "title": "'와르르' 도로 뒤덮자 너도나도…펼쳐진 광경"
+  },
+  {
+   "rank": 4,
+   "type": "useful",
+   "source": "YTN",
+   "title": "경기 버스 노사 합의로 파업 철회...출근길 정상 운행"
+  },
+  {
+   "rank": 5,
+   "type": "useful",
+   "source": "SBS",
+   "title": "정부, 중고거래 플랫폼 지켜야 할 공통 기준 마련"
+  }
+ ],
+ "body_chars": 1076,
+ "video_candidates": 0,
+ "problems": [],
+ "status": "성공",
+ "finished_at": "2026-10-30T10:23+09:00"
 }
