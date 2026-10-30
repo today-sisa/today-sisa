@@ -44,7 +44,7 @@ print("모든 검사 통과")
 
 # 중립 검사: 2~5순위 제목의 한쪽으로 기운 표현
 bad2 = copy.deepcopy(ws)
-bad2["others"][0]["title"] = "청년에게 힘이 되는 기본소득"
+bad2["main"]["title"] = "청년에게 힘이 되는 기본소득"
 assert any("기운 표현" in p for p in g.check_worksheet(cfg, bad2, pick, src))
 
 # 언론사 골고루 섞기: 연합뉴스 100건 + 방송사 몇 건

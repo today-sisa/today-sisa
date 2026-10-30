@@ -375,12 +375,11 @@ def find_videos(cfg: dict, pick: dict, by_id: dict) -> list[dict]:
 
 # ─────────────────────────── 5. 학습지 ───────────────────────────
 
-def build_worksheet_prompt(pick: dict, others: list[dict], by_id: dict, body: str, videos: list[dict],
-                           d: dt.date) -> str:
+def build_worksheet_prompt(pick: dict, by_id: dict, body: str, videos: list[dict], d: dt.date) -> str:
     tpl = (PROMPTS / "worksheet.md").read_text(encoding="utf-8")
     main = by_id[pick["main"]]
     parts = [tpl, f"\n\n오늘 날짜: {d.year}년 {d.month}월 {d.day}일 (기사는 어제~오늘 보도)",
-             "\n[1순위 기사 자료]",
+             f"\n[기사 자료] ({pick['rank']}순위)",
              f"유형(type): {pick['type']}", f"분야: {pick['category']}", f"주제: {pick['topic']}",
              f"대표 제목: {main['title']}"]
     for m in pick["members"]:
@@ -393,15 +392,11 @@ def build_worksheet_prompt(pick: dict, others: list[dict], by_id: dict, body: st
         parts.append("\n[언론사별 제목]")
         for m in pick["members"]:
             parts.append(f"- {by_id[m]['source']}: {by_id[m]['title']}")
-    parts.append("\n[2~5순위 기사 자료]")
-    for o in others:
-        c = by_id[o["main"]]
-        parts.append(f"{o['rank']}순위: [{c['source']}] {c['title']}" + (f" — {c['desc']}" if c["desc"] else ""))
     parts.append("\n[영상 후보]")
     if videos:
         for i, v in enumerate(videos):
             parts.append(f"{i}. ({v['channel']}) {v['title']}")
-        parts.append('1순위 기사와 같은 사건을 다룬 영상의 번호를 "video_index"에 넣어라. '
+        parts.append('이 기사와 같은 사건을 다룬 영상의 번호를 "video_index"에 넣어라. '
                      '정규 보도를 우선하고, 같은 사건이 아니면 -1. 출력 JSON 맨 바깥에 "video_index"를 추가한다.')
     else:
         parts.append('영상 후보 없음. "video_index": -1 을 출력 JSON 맨 바깥에 추가한다.')
@@ -478,9 +473,7 @@ def check_worksheet(cfg: dict, ws: dict, pick: dict, source_text: str) -> list[s
     too_long("도전 문항", m.get("challenge", ""), LIMITS["question"] + 15)
     # 중립 검사: 제목·요약·발문에 한쪽으로 기운 표현이 있으면 안 됨 (찬반 이유·의견 문장은 제외)
     neutral_text = all_text([m.get("title", ""), m.get("summary", []), act.get("issue", ""),
-                             {k: v for k, v in act.items() if k.endswith("_question")},
-                             [[o.get("title", ""), o.get("brief_summary", []), o.get("question", "")]
-                              for o in ws.get("others", [])]])
+                             {k: v for k, v in act.items() if k.endswith("_question")}])
     loaded = [w for w in cfg.get("loaded_words", []) if w in neutral_text]
     if loaded:
         problems.append(f"한쪽으로 기운 표현: {', '.join(loaded)} (제목·요약·발문은 중립적으로)")
@@ -497,14 +490,14 @@ def check_worksheet(cfg: dict, ws: dict, pick: dict, source_text: str) -> list[s
     return problems
 
 
-def make_worksheet(cfg, picks, by_id, body, videos, d) -> dict:
-    pick, others = picks[0], picks[1:]
-    prompt = build_worksheet_prompt(pick, others, by_id, body, videos, d)
+def make_worksheet(cfg, pick, by_id, body, videos, d) -> dict:
+    prompt = build_worksheet_prompt(pick, by_id, body, videos, d)
     source_text = prompt  # 자료 전체를 숫자 검사 기준으로
-    ws = gemini(cfg, prompt, "worksheet.json", temperature=0.5)
+    mock = f"worksheet_{pick['type']}.json" if (FIXTURES / f"worksheet_{pick['type']}.json").exists() else "worksheet.json"
+    ws = gemini(cfg, prompt, mock, temperature=0.5)
     problems = check_worksheet(cfg, ws, pick, source_text)
     if problems and not MOCK:
-        log("학습지 검사 문제 → 한 번 다시 요청:", problems)
+        log(f"{pick['rank']}순위 학습지 검사 문제 → 한 번 다시 요청:", problems)
         fix = prompt + "\n\n[이전 출력의 문제점 — 모두 고쳐서 다시 출력]\n- " + "\n- ".join(problems)
         ws = gemini(cfg, fix, "worksheet.json", temperature=0.3)
         problems = check_worksheet(cfg, ws, pick, source_text)
@@ -514,43 +507,34 @@ def make_worksheet(cfg, picks, by_id, body, videos, d) -> dict:
 
 # ─────────────────────────── 6. 저장 ───────────────────────────
 
-def assemble(cfg, d: dt.date, picks, by_id, ws, videos) -> dict:
-    pick = picks[0]
+def build_item(pick, by_id, ws, videos) -> dict:
     vi = ws.get("video_index", -1)
     video = videos[vi] if isinstance(vi, int) and 0 <= vi < len(videos) else None
-    main = ws.get("main", {})
+    main = dict(ws.get("main", {}))
     if pick["type"] == "media":
         main["headlines"] = [{"source": by_id[m]["source"], "title": by_id[m]["title"],
                               "link": by_id[m]["link"]} for m in pick["members"]]
-    others_ai = {o.get("rank"): o for o in ws.get("others", [])}
-    others = []
-    for p in picks[1:]:
-        c = by_id[p["main"]]
-        o = others_ai.get(p["rank"], {})
-        others.append({
-            "rank": p["rank"], "type": p["type"], "category": p["category"], "topic": p["topic"],
-            "title": o.get("title") or c["title"], "brief_summary": o.get("brief_summary", []),
-            "question": o.get("question", ""), "source": c["source"], "link": c["link"],
-            "reason": p["reason"],
-        })
     c = by_id[pick["main"]]
     return {
+        **main,
+        "rank": pick["rank"], "type": pick["type"], "category": pick["category"], "topic": pick["topic"],
+        "reason": pick["reason"], "source": c["source"], "link": c["link"], "original_title": c["title"],
+        "related": [{"source": by_id[m]["source"], "link": by_id[m]["link"]}
+                    for m in pick["members"] if m != pick["main"]][:4],
+        "video": video,
+        "needs_review": bool(ws.get("_problems")),
+        "review_notes": ws.get("_problems", []),
+    }
+
+
+def assemble(d: dt.date, items: list[dict]) -> dict:
+    return {
+        "version": 2,
         "date": d.isoformat(),
         "generated_at": dt.datetime.now(KST).isoformat(timespec="minutes"),
         "hidden": False,
         "sample": MOCK,
-        "needs_review": bool(ws.get("_problems")),
-        "review_notes": ws.get("_problems", []),
-        "main": {
-            **main,
-            "rank": 1, "type": pick["type"], "category": pick["category"], "topic": pick["topic"],
-            "reason": pick["reason"], "source": c["source"], "link": c["link"],
-            "original_title": c["title"],
-            "related": [{"source": by_id[m]["source"], "link": by_id[m]["link"]}
-                        for m in pick["members"] if m != pick["main"]][:4],
-            "video": video,
-        },
-        "others": others,
+        "items": items,
     }
 
 
@@ -562,10 +546,12 @@ def save(day: dict):
     idx_path = DATA / "index.json"
     idx = json.loads(idx_path.read_text(encoding="utf-8")) if idx_path.exists() else []
     idx = [e for e in idx if e["date"] != day["date"]]
-    idx.insert(0, {"date": day["date"], "title": day["main"].get("title", ""), "topic": day["main"]["topic"],
-                   "type": day["main"]["type"], "category": day["main"]["category"], "hidden": day["hidden"]})
+    first = day["items"][0]
+    idx.insert(0, {"date": day["date"], "title": first.get("title", ""), "topic": first["topic"],
+                   "type": first["type"], "category": first["category"], "hidden": day["hidden"],
+                   "titles": [it.get("title", "") for it in day["items"]]})
     idx_path.write_text(json.dumps(idx[:120], ensure_ascii=False, indent=1), encoding="utf-8")
-    log(f"저장 완료: {day['date']} — {day['main'].get('title')}")
+    log(f"저장 완료: {day['date']} — " + " / ".join(it.get("title", "") for it in day["items"]))
 
 
 def set_hidden(date: str, hidden: bool):
@@ -657,14 +643,29 @@ def run():
     RUN["picks"] = [{"rank": p["rank"], "type": p["type"], "source": by_id[p["main"]]["source"],
                      "title": by_id[p["main"]]["title"]} for p in picks]
 
-    body = gather_body(picks[0], by_id)
-    videos = find_videos(cfg, picks[0], by_id)
-    RUN["body_chars"], RUN["video_candidates"] = len(body), len(videos)
-    ws = make_worksheet(cfg, picks, by_id, body, videos, d)
-    RUN["problems"] = ws["_problems"]
-    if ws["_problems"]:
-        log("검사에서 남은 문제(교사 검토 표시로 공개):", ws["_problems"])
-    save(assemble(cfg, d, picks, by_id, ws, videos))
+    items, RUN["items"] = [], []
+    for p in picks:
+        body = gather_body(p, by_id)
+        videos = find_videos(cfg, p, by_id)
+        try:
+            ws = make_worksheet(cfg, p, by_id, body, videos, d)
+        except Exception as e:  # 한 순위가 실패해도 나머지는 살림
+            log(f"{p['rank']}순위 학습지 실패: {e}")
+            RUN["items"].append({"rank": p["rank"], "error": str(e)[:120]})
+            continue
+        item = build_item(p, by_id, ws, videos)
+        items.append(item)
+        RUN["items"].append({"rank": p["rank"], "body_chars": len(body), "video_candidates": len(videos),
+                             "video": bool(item["video"]), "problems": ws["_problems"]})
+        if ws["_problems"]:
+            log(f"{p['rank']}순위 검사에서 남은 문제(교사 검토 표시로 공개):", ws["_problems"])
+        if not MOCK:
+            time.sleep(5)  # 무료 등급 분당 호출 제한 여유
+    if not items:
+        raise SystemExit("학습지를 하나도 만들지 못했습니다. (어제 학습지가 그대로 보입니다)")
+    for i, it in enumerate(items):  # 실패한 순위가 있으면 순위를 당김
+        it["rank"] = i + 1
+    save(assemble(d, items))
 
 
 if __name__ == "__main__":

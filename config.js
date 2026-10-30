@@ -1,8 +1,12 @@
 // 오늘의 시사 — 사이트 설정
 // REGISTRY_URL: 반코드 등록소(apps-script/class-registry.gs) 웹 앱 주소.
-// 비워 두면 반코드 대신 QR·링크로만 들어옵니다. (그래도 답안 수집은 됩니다)
+//   비워 두면 반코드 대신 QR·링크로만 들어옵니다. (그래도 답안 수집은 됩니다)
+// TEACHER_PASS_SHA256: '선생님' 화면 비밀번호를 암호화한 값입니다. (비밀번호 글자를 그대로 넣지 않습니다)
+//   비밀번호를 바꾸려면 Claude에게 "교사 비밀번호를 ○○로 바꿔줘"라고 하거나,
+//   https://emn178.github.io/online-tools/sha256.html 에 새 비밀번호를 넣고 나온 값을 아래에 붙여 넣으세요.
 window.TODAY_NEWS_CONFIG = {
   REGISTRY_URL: "",
   SITE_TITLE: "오늘의 시사",
-  GRADE: "5·6학년"
+  GRADE: "5·6학년",
+  TEACHER_PASS_SHA256: "b6408dfac4a551b5b184c06e86ae62ee5af7b9af39249edfa95f90dc23b96149"
 };

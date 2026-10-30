@@ -13,7 +13,7 @@
  * 5. 나온 [웹 앱 URL](https://script.google.com/macros/s/.../exec)을 복사해서
  *    오늘의 시사 사이트의 '학생과 함께 할래요' 화면에 붙여 넣습니다.
  *
- * 학생 답은 이 시트에만 저장됩니다. 다른 곳에는 모이지 않습니다.
+ * 학생 답과 '오늘의 주제'는 이 시트에만 저장됩니다. 다른 곳에는 모이지 않습니다.
  * 코드를 고친 뒤에는 [배포] → [배포 관리] → 연필 → 버전 '새 버전'으로 다시 배포하세요.
  */
 
@@ -43,12 +43,16 @@ function clip_(v) {
   return String(v == null ? '' : v).slice(0, MAX_LEN);
 }
 
-/** 연결 확인용 */
+/** 연결 확인 · 오늘의 주제 읽기 */
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || 'ping';
   if (action === 'ping') {
     sheet_();
-    return out_({ ok: true, app: 'today-news', sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+    return out_({ ok: true, app: 'today-news', topic: true, sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+  }
+  if (action === 'topic') {
+    const p = PropertiesService.getScriptProperties();
+    return out_({ ok: true, date: p.getProperty('topicDate') || '', rank: Number(p.getProperty('topicRank') || 0) });
   }
   return out_({ ok: false, error: 'unknown action' });
 }
@@ -60,6 +64,14 @@ function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents || '{}');
     if (d.app !== 'today-news') return out_({ ok: false, error: 'bad app' });
+    if (d.action === 'setTopic') {  // 선생님이 오늘의 주제를 고름
+      const rank = Number(d.rank);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(d.date)) || !(rank >= 1 && rank <= 5)) {
+        return out_({ ok: false, error: 'bad topic' });
+      }
+      PropertiesService.getScriptProperties().setProperties({ topicDate: String(d.date), topicRank: String(rank) });
+      return out_({ ok: true, date: d.date, rank: rank });
+    }
     const row = [
       new Date(), clip_(d.date), clip_(d.title), clip_(d.number), clip_(d.name),
       clip_(d.words_score), clip_(d.fo_score)
