@@ -22,7 +22,7 @@
 const SHEET_NAME = '답안';
 const HEADERS = ['제출 시각', '뉴스 날짜', '뉴스 제목', '번호', '이름', '낱말 (맞힌 수)', '사실·의견 (맞힌 수)',
   '질문1', '답1', '질문2', '답2', '질문3', '답3', '질문4', '답4', '질문5', '답5', '상세(자동)'];
-const CODE_VERSION = 2;
+const CODE_VERSION = 3;
 const MAX_LEN = 1500;
 
 function sheet_() {
@@ -112,7 +112,9 @@ function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents || '{}');
     if (d.app !== 'today-news') return out_({ ok: false, error: 'bad app' });
-    if (d.action === 'setTopic') {  // 선생님이 오늘의 주제를 고름
+    if (d.action === 'setTopic') {  // 선생님이 오늘의 주제를 고름 (선생님 열쇠가 있으면 열쇠 확인)
+      const tk = props_().getProperty('teacherKey');
+      if (tk && d.key !== tk) return out_({ ok: false, error: 'key' });
       const rank = Number(d.rank);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(d.date)) || !(rank >= 1 && rank <= 5)) {
         return out_({ ok: false, error: 'bad topic' });

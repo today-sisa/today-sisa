@@ -125,7 +125,7 @@ VIEWS.teacherHome = () => {
   show(`${banners(false)}
     <div class="panel">${mine
       ? `<b>우리 반: ${esc(mine.name)}</b>${mine.code ? ` · 반코드 <b>${esc(mine.code)}</b>` : ''}
-         <p class="muted" id="topicNow">오늘 주제: ${topicRank ? `${topicRank}순위` : '아직 고르지 않음 (고르지 않으면 1순위로 진행)'}</p>
+         <p class="muted" id="topicNow">오늘 주제: ${topicRank ? `${topicRank}순위` : '아직 고르지 않음 (고를 때까지 아이들은 기다리는 화면을 봐요)'}</p>
          <div class="row"><button class="btn sun small-btn" id="toRes" type="button">답 모아 보기</button>
            <button class="btn ghost small-btn" id="toQR" type="button">QR·반 링크 보기</button>
            ${mine.sheetUrl ? `<a class="btn ghost small-btn" href="${esc(mine.sheetUrl)}" target="_blank" rel="noopener">내 답안 시트 열기</a>` : ''}</div>`
@@ -183,11 +183,21 @@ async function refreshTopic(mine){
 
 async function setTopic(mine, rank, btn){
   btn.disabled = true; btn.textContent = '저장하는 중…';
-  const payload = JSON.stringify({app:'today-news', action:'setTopic', date:DAY.date, rank});
-  let ok = false;
-  try{ const j = await (await fetch(mine.url, {method:'POST', body:payload})).json(); ok = !!j.ok; }
-  catch(e){ try{ await fetch(mine.url, {method:'POST', body:payload, mode:'no-cors'}); ok = true; }catch(e2){} }
-  if(!ok){ btn.disabled = false; btn.textContent = '다시 눌러 주세요 (저장 실패)'; return; }
+  const payload = JSON.stringify({app:'today-news', action:'setTopic', date:DAY.date, rank, key: mine.key || ''});
+  let ok = false, err = '';
+  try{ const j = await (await fetch(mine.url, {method:'POST', body:payload})).json(); ok = !!j.ok; err = j.error || ''; }
+  catch(e){
+    try{ await fetch(mine.url, {method:'POST', body:payload, mode:'no-cors'});
+      const t = await (await fetch(mine.url + '?action=topic')).json();  // 정말 저장됐는지 확인
+      ok = t.ok && t.date === DAY.date && Number(t.rank) === rank; if(!ok) err = 'key';
+    }catch(e2){}
+  }
+  if(!ok){
+    btn.disabled = false;
+    if(err === 'key'){ btn.textContent = '선생님 열쇠가 필요해요'; setTimeout(() => go('results', {r:rank}), 900); }
+    else btn.textContent = '다시 눌러 주세요 (저장 실패)';
+    return;
+  }
   LS.set(`topic:${mine.url}:${DAY.date}`, rank);
   go('share', {r:rank});
 }
@@ -450,7 +460,8 @@ VIEWS.classSetup = async () => {
     go('classReady', {}, true);
   };
 };
-const classLink = mine => mine.code ? `${BASE}?c=${mine.code}` : `${BASE}?u=${encodeURIComponent(mine.url)}&n=${encodeURIComponent(mine.name)}`;
+// QR·링크에는 반 시트 주소를 직접 넣어 등록소를 거치지 않게 함 (등록소는 반코드를 손으로 칠 때만)
+const classLink = mine => `${BASE}?u=${encodeURIComponent(mine.url)}&n=${encodeURIComponent(mine.name)}${mine.code ? `&c=${mine.code}` : ''}`;
 VIEWS.classReady = () => {
   const mine = LS.get('myClass', null);
   if(!mine) return go('classSetup', {}, true);
@@ -504,7 +515,7 @@ async function lookupCode(code){
 VIEWS.nameEntry = () => {
   const prev = LS.get('student', {number:'', name:''});
   show(`<h2>${esc(CLASS.name)}</h2>
-    <p>번호와 이름(또는 별명)을 적어 주세요. 답은 우리 선생님께만 가요.</p>
+    <p>번호와 이름을 적어 주세요. 선생님이 정해 주시면 <b>별명</b>을 써도 돼요. 답은 우리 선생님께만 가요.</p>
     <label class="field" for="stNum">번호</label><input type="number" id="stNum" min="1" max="60" value="${esc(prev.number)}" inputmode="numeric">
     <label class="field" for="stName">이름 또는 별명</label><input type="text" id="stName" maxlength="12" value="${esc(prev.name)}">
     <div class="row"><button class="btn" id="stGo" type="button">시작하기</button></div><p class="muted" id="stMsg"></p>`);
@@ -521,14 +532,16 @@ async function classTopicRank(){
   try{
     const r = await (await fetch(CLASS.url + '?action=topic')).json();
     if(r.ok && r.date === DAY.date && r.rank) return Number(r.rank);
+    if(r.ok) return 0;          // 선생님이 아직 오늘 주제를 고르지 않음
   }catch(e){}
-  return 1;
+  return -1;                    // 시트에 연결하지 못함
 }
 
 VIEWS.studentHome = async () => {
   if(DAY.hidden) return hiddenDay();
   show(`<p class="muted" style="margin-top:30px">오늘의 주제를 불러오는 중이에요.</p>`);
   const rank = await classTopicRank();
+  if(rank <= 0) return waitTopic(rank);
   ITEM = itemByRank(rank);
   if(!full(ITEM)) ITEM = DAY.items.find(full) || ITEM;
   tvMode = false;
@@ -546,10 +559,25 @@ VIEWS.studentHome = async () => {
   startBtn.onclick = () => go('step', {i:0, r:ITEM.rank});
   notMe.onclick = e => { e.preventDefault(); LS.del('student'); STUDENT = null; go('nameEntry'); };
 };
+let waitTimer = null;
+function waitTopic(rank){
+  clearInterval(waitTimer);
+  show(`<div class="panel done-card"><div class="medal" aria-hidden="true">⏳</div>
+    <h2>${rank === 0 ? '선생님이 오늘 주제를 고르면 시작해요' : '선생님 시트에 연결하지 못했어요'}</h2>
+    <p class="muted">${rank === 0 ? '잠시 기다리면 저절로 시작 화면이 나와요.' : '인터넷 연결을 확인하고 다시 눌러 주세요.'}</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="again" type="button">다시 확인</button></div></div>`);
+  again.onclick = () => VIEWS.studentHome();
+  const mine = history.state;
+  waitTimer = setInterval(() => {
+    if(history.state !== mine || !document.getElementById('again')){ clearInterval(waitTimer); return; }
+    VIEWS.studentHome();
+  }, 20000);
+}
+
 function hiddenDay(){
   const prev = INDEX.find(e => !e.hidden && e.date < DAY.date);
   show(`<h2>오늘 뉴스는 쉬어 가요</h2><p>선생님 검토로 오늘 학습지는 내렸어요.</p>
-    ${prev ? `<div class="row"><a class="btn" href="?date=${prev.date}${CLASS && CLASS.code ? '&c='+CLASS.code : ''}">지난 학습지 풀기 (${prev.date})</a></div>` : ''}`);
+    ${prev ? `<div class="row"><a class="btn" href="?date=${prev.date}${CLASS ? '&u='+encodeURIComponent(CLASS.url)+'&n='+encodeURIComponent(CLASS.name) : ''}">지난 학습지 풀기 (${prev.date})</a></div>` : ''}`);
 }
 function streak(){
   const set = new Set(LS.get('doneDays', []));
@@ -870,7 +898,7 @@ async function printSheet(it, withAnswers){
 /* ───────── 지난 학습지 ───────── */
 VIEWS.archive = () => {
   const list = INDEX.filter(e => !e.hidden);
-  show(`<h2>지난 학습지</h2>${list.length ? `<ul class="archive">${list.map(e => `<li><a href="?date=${e.date}${CLASS && CLASS.code ? '&c='+CLASS.code : ''}">${e.date}</a> · ${esc((e.titles||[e.title]).join(' / '))}</li>`).join('')}</ul>` : '<p class="muted">아직 쌓인 학습지가 없어요.</p>'}`);
+  show(`<h2>지난 학습지</h2>${list.length ? `<ul class="archive">${list.map(e => `<li><a href="?date=${e.date}${CLASS ? '&u='+encodeURIComponent(CLASS.url)+'&n='+encodeURIComponent(CLASS.name) : ''}">${e.date}</a> · ${esc((e.titles||[e.title]).join(' / '))}</li>`).join('')}</ul>` : '<p class="muted">아직 쌓인 학습지가 없어요.</p>'}`);
 };
 
 /* ───────── 시작 ───────── */
@@ -890,7 +918,7 @@ async function boot(){
   // 학생 링크(QR)로 들어온 경우
   const c = qs.get('c'), u = qs.get('u');
   if(u && SHEET_RE.test(u)){
-    CLASS = {url:u, name:qs.get('n') || '우리 반', code:''}; LS.set('class', CLASS);
+    CLASS = {url:u, name:qs.get('n') || '우리 반', code:(c || '').toUpperCase()}; LS.set('class', CLASS);
   } else if(c && CFG.REGISTRY_URL){
     const saved = LS.get('class', null);
     if(saved && saved.code === c.toUpperCase()) CLASS = saved;
